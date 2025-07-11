@@ -1,4 +1,6 @@
 
 # Trends in Inference Efficiency
 
-![Inference Efficiency Trends](./open_trend.png)
+code to analyse trends in inference prices to infer algorithmic progress in language model inference.
+
+![Inference Efficiency Trends](./trend_open.png)
