@@ -1,0 +1,30 @@
+Model,Date,Benchmark_Price_USD,Input_Token_Column,Output_Token_Column
+GPT-5 (medium),8/1/2025,59.9190875,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+GPT-5 (high),8/1/2025,43.11793875,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Gemini 2.5 Pro,6/1/2025,2.50696875,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Claude 4 Opus,5/1/2025,34.216874999999995,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Claude 4 Sonnet,5/1/2025,2.228748,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen3 235B A22B,7/1/2024,6.72720632,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Gemma 3 27B,4/1/2025,0.11803764,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1,1/1/2025,32.232273,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1,3/1/2025,27.764210220000002,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Qwen 14B,3/1/2025,21.3041972,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Qwen 14B,6/1/2025,4.841863000000001,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Llama 70B,2/1/2025,16.00647336,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Llama 70B,3/1/2025,15.99408288,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Llama 70B,4/1/2025,14.01710832,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+DeepSeek R1 Distill Llama 70B,7/1/2025,12.973322400000002,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Llama 3.3 70B,12/1/2024,1.14458696,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Llama 3.3 70B,1/1/2025,1.11898553,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Phi-4,1/1/2025,0.35363314,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Ministral 3B,3/1/2025,0.55225356,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2.5 72B,10/1/2024,1.2452956,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2.5 72B,11/1/2024,1.04260696,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2.5 72B,9/1/2025,1.01032293,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Llama 3.2 90B (Vision),10/1/2024,0.9470007999999999,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Mistral Small (Sep '24),10/1/2024,2.7645,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2 72B,9/1/2024,3.4334419600000006,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2 72B,11/1/2024,2.7306074000000002,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2 72B,12/1/2024,1.7263116,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Qwen2 72B,4/1/2025,1.5344992000000002,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
+Llama 3 70B,6/1/2024,0.39663736000000005,input_tokens_epoch_gpqa,output_tokens_epoch_gpqa
