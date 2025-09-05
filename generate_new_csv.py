@@ -243,6 +243,36 @@ def process_price_history(
             cache_read_tokens = cache_write_tokens = None
             cache_read_price = cache_write_price = None
 
+        # --- BEGIN: Warn if tokens specified but price missing (per model/row) ---
+        # For each date, check if tokens are specified but price is missing for input/output/cache
+        for date_str in sorted_dates:
+            input_price_col = complete_pairs[date_str]["input"]
+            output_price_col = complete_pairs[date_str]["output"]
+
+            input_price = row.get(input_price_col, np.nan)
+            output_price = row.get(output_price_col, np.nan)
+
+            # Input tokens & price
+            if input_token_col and input_token_col in row and not pd.isna(row[input_token_col]):
+                if pd.isna(input_price):
+                    print(f"WARNING: Model '{model_name}' specifies input tokens ({input_token_col}={row[input_token_col]}) but is missing input price for {date_str} ({input_price_col})")
+
+            # Output tokens & price
+            if output_token_col and output_token_col in row and not pd.isna(row[output_token_col]):
+                if pd.isna(output_price):
+                    print(f"WARNING: Model '{model_name}' specifies output tokens ({output_token_col}={row[output_token_col]}) but is missing output price for {date_str} ({output_price_col})")
+
+            # Cache read tokens & price
+            if cache_read_token_col and cache_read_token_col in row and not pd.isna(row[cache_read_token_col]):
+                if cache_read_price_col and (cache_read_price_col not in row or pd.isna(row.get(cache_read_price_col, np.nan))):
+                    print(f"WARNING: Model '{model_name}' specifies cache read tokens ({cache_read_token_col}={row[cache_read_token_col]}) but is missing cache read price ({cache_read_price_col}) for {date_str}")
+
+            # Cache write tokens & price
+            if cache_write_token_col and cache_write_token_col in row and not pd.isna(row[cache_write_token_col]):
+                if cache_write_price_col and (cache_write_price_col not in row or pd.isna(row.get(cache_write_price_col, np.nan))):
+                    print(f"WARNING: Model '{model_name}' specifies cache write tokens ({cache_write_token_col}={row[cache_write_token_col]}) but is missing cache write price ({cache_write_price_col}) for {date_str}")
+        # --- END: Warn if tokens specified but price missing ---
+
         # Initialize price history for this model
         if model_name not in model_price_history:
             model_price_history[model_name] = []
@@ -442,19 +472,20 @@ def process_price_history(
 def main():
     """Main function to process the CSV file"""
 
-    # Configuration
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "price_reduction_models.csv"
+    # GPQA-Diamond Configuration
+    # ================================================
+    INPUT_FILE = "inference_data_new_large.csv"
+    OUTPUT_FILE = "price_reduction_models.csv"
 
-    # # Benchmark token columns (set to None to use only blended price tracking)
-    # INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
-    # OUTPUT_TOKEN_COL = "output_tokens_epoch_gpqa"
+    # Benchmark token columns (set to None to use only blended price tracking)
+    INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
+    OUTPUT_TOKEN_COL = "output_tokens_epoch_gpqa"
 
-    # # Cache token columns (set to None to disable cache calculation)
-    # CACHE_READ_TOKEN_COL = None  # e.g., "cache_read_tokens_epoch_gpqa"
-    # CACHE_WRITE_TOKEN_COL = None  # e.g., "cache_write_tokens_epoch_gpqa"
-    # CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
-    # CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
+    # Cache token columns (set to None to disable cache calculation)
+    CACHE_READ_TOKEN_COL = None  # e.g., "cache_read_tokens_epoch_gpqa"
+    CACHE_WRITE_TOKEN_COL = None  # e.g., "cache_write_tokens_epoch_gpqa"
+    CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
+    CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
 
     # Column Specfication for SWE
     # ================================================
@@ -469,14 +500,14 @@ def main():
 
     # Columns Specific to Frontier Math
     # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
-    INPUT_TOKEN_COL = "input tokens frontier"
-    OUTPUT_TOKEN_COL = "output tokens frontier"
-    CACHE_READ_TOKEN_COL = "cache read tokens frontier"
-    CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
-    CACHE_READ_PRICE_COL = "cache read cost "
-    CACHE_WRITE_PRICE_COL = "cache write cost"
+    # INPUT_FILE = "inference_data_new_large.csv"
+    # OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
+    # INPUT_TOKEN_COL = "input tokens frontier"
+    # OUTPUT_TOKEN_COL = "output tokens frontier"
+    # CACHE_READ_TOKEN_COL = "cache read tokens frontier"
+    # CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
+    # CACHE_READ_PRICE_COL = "cache read cost "
+    # CACHE_WRITE_PRICE_COL = "cache write cost"
 
     # Cache token columns (set to None to disable cache calculation)
 

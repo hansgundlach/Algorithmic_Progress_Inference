@@ -478,6 +478,16 @@ df_swe["Active Parameters"] = np.where(
 )
 
 # %%
+df_frontier_math = pd.read_csv("frontier_math_price_reduction_models.csv")
+
+df_frontier_math["Release Date"] = pd.to_datetime(df_frontier_math["Release Date"])
+# # Create Active Parameters column by choosing Known Active Parameters when available, otherwise use Parameters
+df_frontier_math["Active Parameters"] = np.where(
+    df_frontier_math["Known Active Parameters"].notna(),
+    df_frontier_math["Known Active Parameters"],
+    df_frontier_math["Parameters"],
+)
+#%%
 
 
 # Index(['Model', 'Creator', 'License', 'Context\nWindow',
@@ -518,7 +528,7 @@ df_swe["Active Parameters"] = np.where(
 # %%
 model, data, results = plot_price_mmlu_regression(
     df_gpqa,
-    open_license_only=True,
+    open_license_only=False,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
@@ -543,7 +553,6 @@ model, data, results = plot_price_mmlu_regression(
 )
 # %%
 
-
 model, data, results = plot_price_mmlu_regression(
     df_swe,
     open_license_only=False,
@@ -557,4 +566,18 @@ model, data, results = plot_price_mmlu_regression(
     pareto_frontier_only=True,
 )
 
+# %%
+# frontier math analysis 
+model, data, results = plot_price_mmlu_regression(
+    df_frontier_math,
+    open_license_only=False,
+    price_column="Benchmark Cost USD",
+    exclude_dominated=False,
+    benchmark_col="frontier accuracy",
+    min_mmlu=2,
+    max_mmlu=100,
+    exclude_reasoning=False,
+    use_huber=False,
+    pareto_frontier_only=True,
+)
 # %%
