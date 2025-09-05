@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Model Price Reduction History Generator - Blended Price Version
+Model Price Reduction History Generator - Fixed Version
 
 This script processes historical pricing data for AI models and creates a new CSV where
 each price reduction for a benchmark creates a new row entry.
 
-Key features:
+Key fixes:
 1. Strict cost decrease checking (no duplicates for same model)
 2. Proper price column replacement
-3. Blended price column (3:1 input:output) calculation and inclusion
-4. Blended price column removal for all other historical columns
-5. Better duplicate detection
+3. Blended price column removal
+4. Better duplicate detection
 """
 
 import pandas as pd
@@ -44,26 +43,9 @@ def calculate_benchmark_cost(input_tokens, output_tokens, input_price, output_pr
     return input_cost + output_cost
 
 
-def calculate_blended_price(input_price, output_price):
-    """
-    Calculate the blended price using a 3:1 input:output token ratio.
-    Blended price = (3 * input_price + output_price) / 4
-    """
-    if pd.isna(input_price) or pd.isna(output_price):
-        return np.nan
-    try:
-        # Try to convert to float if not already
-        input_price = float(input_price)
-        output_price = float(output_price)
-    except Exception:
-        return np.nan
-    return (3 * input_price + output_price) / 4
-
-
 def process_price_history(df, input_token_col, output_token_col, verbose=False):
     """
     Process the dataframe to create new rows for each price reduction.
-    Adds a blended price column (3:1 input:output).
     """
 
     # Find all price columns (input and output pairs)
@@ -181,14 +163,6 @@ def process_price_history(df, input_token_col, output_token_col, verbose=False):
                 # Add the calculated benchmark cost
                 new_row["Benchmark Cost USD"] = current_cost
 
-                # Add the blended price (3:1 input:output)
-                blended_price = calculate_blended_price(input_price, output_price)
-                # Ensure the blended price is a float, not an object or string
-                if pd.isna(blended_price):
-                    new_row["Blended Price (3:1) USD/1M Tokens"] = np.nan
-                else:
-                    new_row["Blended Price (3:1) USD/1M Tokens"] = float(blended_price)
-
                 # Remove ALL other price-related columns
                 price_cols_to_remove = [
                     "Lowest Output Price Found AA",
@@ -200,7 +174,7 @@ def process_price_history(df, input_token_col, output_token_col, verbose=False):
                     "total price swe",
                 ]
 
-                # Remove blended price columns (historical)
+                # Remove blended price columns
                 blended_cols = [
                     col for col in new_row.index if "blended" in col.lower()
                 ]
@@ -237,25 +211,11 @@ def process_price_history(df, input_token_col, output_token_col, verbose=False):
         result_df = pd.DataFrame(new_rows)
         result_df.reset_index(drop=True, inplace=True)
 
-        # Ensure blended price column is recalculated and filled if missing
-        if "Blended Price (3:1) USD/1M Tokens" not in result_df.columns:
-            result_df["Blended Price (3:1) USD/1M Tokens"] = np.nan
-
-        # Recalculate blended price for all rows to ensure it's not empty
-        result_df["Blended Price (3:1) USD/1M Tokens"] = result_df.apply(
-            lambda r: calculate_blended_price(
-                r.get("Input Price\nUSD/1M Tokens", np.nan),
-                r.get("Output Price\nUSD/1M Tokens", np.nan),
-            ),
-            axis=1,
-        )
-
         # Keep ONLY these price-related columns, remove all others
         keep_price_cols = [
             "Input Price\nUSD/1M Tokens",
             "Output Price\nUSD/1M Tokens",
             "Benchmark Cost USD",
-            "Blended Price (3:1) USD/1M Tokens",
         ]
 
         # Find all price/cost-related columns to potentially drop
@@ -271,24 +231,9 @@ def process_price_history(df, input_token_col, output_token_col, verbose=False):
         if cols_to_drop:
             result_df = result_df.drop(columns=cols_to_drop)
 
-        # Ensure the blended price column is float and not object
-        result_df["Blended Price (3:1) USD/1M Tokens"] = pd.to_numeric(
-            result_df["Blended Price (3:1) USD/1M Tokens"], errors="coerce"
-        )
-
         return result_df
     else:
-        # If no new rows, return an empty DataFrame with the expected columns
-        return pd.DataFrame(
-            columns=[
-                "Model",
-                "Release Date",
-                "Input Price\nUSD/1M Tokens",
-                "Output Price\nUSD/1M Tokens",
-                "Benchmark Cost USD",
-                "Blended Price (3:1) USD/1M Tokens",
-            ]
-        )
+        return pd.DataFrame(columns=df.columns)
 
 
 def main():
@@ -306,7 +251,7 @@ def main():
     VERBOSE = False
 
     print("=" * 60)
-    print("Model Price Reduction History Generator (BLENDED PRICE)")
+    print("Model Price Reduction History Generator (FIXED)")
     print("=" * 60)
     print(f"Input file: {INPUT_FILE}")
     print(f"Output file: {OUTPUT_FILE}")
