@@ -462,7 +462,7 @@ df_gpqa["Active Parameters"] = np.where(
     df_gpqa["Parameters"],
 )
 # %%
-df_swe = pd.read_csv("inference_data_new_large.csv")
+df_swe = pd.read_csv("swe_price_reduction_models_edited.csv")
 print(df_swe.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -542,14 +542,16 @@ model, data, results = plot_price_mmlu_regression(
     pareto_frontier_only=True,
 )
 # %%
+
+
 model, data, results = plot_price_mmlu_regression(
     df_swe,
     open_license_only=False,
-    price_column="total price swe",
+    price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_swe",
     min_mmlu=2,
-    max_mmlu=85,
+    max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
     pareto_frontier_only=True,

@@ -8,6 +8,15 @@ from scipy import stats
 from datetime import datetime
 import warnings
 warnings.filterwarnings("ignore")
+
+#%%
+df = pd.read_csv('inference_data_new_large.csv')
+print("All columns in inference_data_new_large.csv:")
+for i, col in enumerate(df.columns):
+    print(f"{i}: {col}")
+
+
+
 #%%
 
 
