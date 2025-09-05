@@ -807,11 +807,11 @@ plot_benchmark_price_vs_time(
     min_date="2024-01-01",
     confidence_interval=False,
     fit_overall_trend=True,
-    show_model_names=False,
+    show_model_names=True,
     use_quantile_regression=False,
     quantile=0.9,
     record_price_trend=False,
-    benchmark_label="Swe-Bench V",  # <-- Example: change label here
+    benchmark_label="GPQA-Diamond",  # <-- Example: change label here
 )
 
 # %%

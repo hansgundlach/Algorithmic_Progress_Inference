@@ -474,18 +474,18 @@ def main():
 
     # GPQA-Diamond Configuration
     # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "price_reduction_models.csv"
+    # INPUT_FILE = "inference_data_new_large.csv"
+    # OUTPUT_FILE = "price_reduction_models.csv"
 
-    # Benchmark token columns (set to None to use only blended price tracking)
-    INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
-    OUTPUT_TOKEN_COL = "output_tokens_epoch_gpqa"
+    # # Benchmark token columns (set to None to use only blended price tracking)
+    # INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
+    # OUTPUT_TOKEN_COL = "output_tokens_epoch_gpqa"
 
-    # Cache token columns (set to None to disable cache calculation)
-    CACHE_READ_TOKEN_COL = None  # e.g., "cache_read_tokens_epoch_gpqa"
-    CACHE_WRITE_TOKEN_COL = None  # e.g., "cache_write_tokens_epoch_gpqa"
-    CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
-    CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
+    # # Cache token columns (set to None to disable cache calculation)
+    # CACHE_READ_TOKEN_COL = None  # e.g., "cache_read_tokens_epoch_gpqa"
+    # CACHE_WRITE_TOKEN_COL = None  # e.g., "cache_write_tokens_epoch_gpqa"
+    # CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
+    # CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
 
     # Column Specfication for SWE
     # ================================================
@@ -500,14 +500,14 @@ def main():
 
     # Columns Specific to Frontier Math
     # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
-    # INPUT_TOKEN_COL = "input tokens frontier"
-    # OUTPUT_TOKEN_COL = "output tokens frontier"
-    # CACHE_READ_TOKEN_COL = "cache read tokens frontier"
-    # CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
-    # CACHE_READ_PRICE_COL = "cache read cost "
-    # CACHE_WRITE_PRICE_COL = "cache write cost"
+    INPUT_FILE = "inference_data_new_large.csv"
+    OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
+    INPUT_TOKEN_COL = "input tokens frontier"
+    OUTPUT_TOKEN_COL = "output tokens frontier"
+    CACHE_READ_TOKEN_COL = "cache read tokens frontier"
+    CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
+    CACHE_READ_PRICE_COL = "cache read cost "
+    CACHE_WRITE_PRICE_COL = "cache write cost"
 
     # Cache token columns (set to None to disable cache calculation)
 

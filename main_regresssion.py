@@ -528,7 +528,7 @@ df_frontier_math["Active Parameters"] = np.where(
 # %%
 model, data, results = plot_price_mmlu_regression(
     df_gpqa,
-    open_license_only=False,
+    open_license_only=True,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
@@ -536,7 +536,7 @@ model, data, results = plot_price_mmlu_regression(
     max_mmlu=85,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=True,
+    pareto_frontier_only=False,
 )
 # %%
 model, data, results = plot_price_mmlu_regression(
@@ -578,6 +578,6 @@ model, data, results = plot_price_mmlu_regression(
     max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=True,
+    pareto_frontier_only=False,
 )
 # %%
