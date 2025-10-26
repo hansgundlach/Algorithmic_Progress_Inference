@@ -238,11 +238,10 @@ def plot_price_mmlu_regression(
     annual_pct_change = (np.exp(annual_log_change) - 1) * 100
     factor_change_per_year = np.exp(annual_log_change)
 
-    # Express as factor decrease if price is decreasing
-    if factor_change_per_year < 1:
-        factor_decrease_per_year = 1 / factor_change_per_year
-    else:
-        factor_decrease_per_year = None
+    # Always express as factor decrease to show values < 1 for decreasing trends
+    # When alpha < 0: price decreasing, factor_change < 1, so 1/factor_change > 1 (factor decrease)
+    # When alpha > 0: price increasing, factor_change > 1, so 1/factor_change < 1 (factor decrease)
+    factor_decrease_per_year = 1 / factor_change_per_year
 
     # 12) Calculate confidence intervals for the time coefficient (only for OLS)
     if not use_huber:
@@ -270,13 +269,9 @@ def plot_price_mmlu_regression(
         factor_change_lower = np.exp(annual_log_change_lower)
         factor_change_upper = np.exp(annual_log_change_upper)
 
-        # Express as factor decrease for confidence interval if price is decreasing
-        if factor_change_per_year < 1:
-            factor_decrease_lower = 1 / factor_change_upper
-            factor_decrease_upper = 1 / factor_change_lower
-        else:
-            factor_decrease_lower = None
-            factor_decrease_upper = None
+        # Always express as factor decrease confidence interval (reciprocal to match factor_decrease_per_year)
+        factor_decrease_lower = 1 / factor_change_upper
+        factor_decrease_upper = 1 / factor_change_lower
     else:
         # HuberRegressor does not provide standard errors/confidence intervals
         factor_change_lower = None
@@ -332,30 +327,17 @@ def plot_price_mmlu_regression(
 
     # Plot regression line (at median MMLU)
     data_source = "Pareto frontier only" if pareto_frontier_only else "all data"
-    if factor_decrease_per_year:
-        regression_label = (
-            f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_mmlu:.1f}%)\n"
-            f"Annual change: {annual_pct_change:.2f}%/yr\n"
-            f"Factor decrease: {factor_decrease_per_year:.3f}×/yr"
-            + (
-                f" (90% CI: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}])"
-                if factor_decrease_lower is not None
-                else ""
-            )
-            + f"\nR² = {r2:.3f}"
+    regression_label = (
+        f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_mmlu:.1f}%)\n"
+        f"Annual change: {annual_pct_change:.2f}%/yr\n"
+        f"Factor decrease: {factor_decrease_per_year:.3f}×/yr"
+        + (
+            f" (90% CI: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}])"
+            if factor_decrease_lower is not None
+            else ""
         )
-    else:
-        regression_label = (
-            f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_mmlu:.1f}%)\n"
-            f"Annual change: {annual_pct_change:.2f}%/yr\n"
-            f"Factor change: {factor_change_per_year:.3f}×/yr"
-            + (
-                f" (90% CI: [{factor_change_lower:.3f}, {factor_change_upper:.3f}])"
-                if factor_change_lower is not None
-                else ""
-            )
-            + f"\nR² = {r2:.3f}"
-        )
+        + f"\nR² = {r2:.3f}"
+    )
 
     plt.plot(x_dates, np.exp(y_pred_plot), "r-", lw=3, label=regression_label)
 
@@ -395,19 +377,11 @@ def plot_price_mmlu_regression(
     print(f"R² score: {r2:.4f}")
     print(f"\nTime coefficient (alpha): {alpha:.6f}")
     print(f"Annual percentage change: {annual_pct_change:.2f}%/yr")
-
-    if factor_decrease_per_year:
-        print(f"Annual factor decrease: {factor_decrease_per_year:.3f}×/yr")
-        if factor_decrease_lower is not None:
-            print(
-                f"90% CI for factor decrease: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}]"
-            )
-    else:
-        print(f"Annual factor change: {factor_change_per_year:.3f}×/yr")
-        if factor_change_lower is not None:
-            print(
-                f"90% CI for factor change: [{factor_change_lower:.3f}, {factor_change_upper:.3f}]"
-            )
+    print(f"Annual factor decrease: {factor_decrease_per_year:.3f}×/yr")
+    if factor_decrease_lower is not None:
+        print(
+            f"90% CI for factor decrease: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}]"
+        )
 
     print(f"{benchmark_name} coefficient (beta): {beta:.3f}")
     print(f"Intercept (c): {c:.3f}")
@@ -423,17 +397,11 @@ def plot_price_mmlu_regression(
             "c": c,
             "annual_pct_change": annual_pct_change,
             "factor_change_per_year": factor_change_per_year,
-            "factor_decrease_per_year": (
-                factor_decrease_per_year if factor_change_per_year < 1 else None
-            ),
+            "factor_decrease_per_year": factor_decrease_per_year,
             "factor_change_ci_lower": factor_change_lower,
             "factor_change_ci_upper": factor_change_upper,
-            "factor_decrease_ci_lower": (
-                factor_decrease_lower if factor_change_per_year < 1 else None
-            ),
-            "factor_decrease_ci_upper": (
-                factor_decrease_upper if factor_change_per_year < 1 else None
-            ),
+            "factor_decrease_ci_lower": factor_decrease_lower,
+            "factor_decrease_ci_upper": factor_decrease_upper,
             "r2_score": r2,
             "regression_type": reg_type,
             "pareto_frontier_only": pareto_frontier_only,
@@ -487,9 +455,20 @@ df_frontier_math["Active Parameters"] = np.where(
     df_frontier_math["Known Active Parameters"],
     df_frontier_math["Parameters"],
 )
+# %%
+
+df_aime = pd.read_csv("aime_price_reduction_models.csv")
+# print(df_aime.columns)
+# convert release date to datetime where release date is not nan
+df_aime["Release Date"] = pd.to_datetime(df_aime["Release Date"])
+# # Create Active Parameters column by choosing Known Active Parameters when available, otherwise use Parameters
+df_aime["Active Parameters"] = np.where(
+    df_aime["Known Active Parameters"].notna(),
+    df_aime["Known Active Parameters"],
+    df_aime["Parameters"],
+)
+print(len(df_aime))
 #%%
-
-
 # Index(['Model', 'Creator', 'License', 'Context\nWindow',
 #        'Artificial Analysis\nIntelligence Index',
 #        'MMLU-Pro (Reasoning & Knowledge)',
@@ -528,7 +507,7 @@ df_frontier_math["Active Parameters"] = np.where(
 # %%
 model, data, results = plot_price_mmlu_regression(
     df_gpqa,
-    open_license_only=True,
+    open_license_only=False,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
@@ -536,7 +515,7 @@ model, data, results = plot_price_mmlu_regression(
     max_mmlu=85,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=False,
+    pareto_frontier_only=True,
 )
 # %%
 model, data, results = plot_price_mmlu_regression(
@@ -559,21 +538,39 @@ model, data, results = plot_price_mmlu_regression(
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_swe",
-    min_mmlu=2,
+    min_mmlu=10,
     max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=True,
+    pareto_frontier_only=True
 )
 
 # %%
-# frontier math analysis 
+# frontier math analysis
 model, data, results = plot_price_mmlu_regression(
     df_frontier_math,
     open_license_only=False,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="frontier accuracy",
+    min_mmlu=2,
+    max_mmlu=100,
+    exclude_reasoning=False,
+    use_huber=False,
+    pareto_frontier_only=True,
+)
+# %%
+print(df_aime.columns)
+# print(df_aime['Benchmark Cost USD'])
+#%%
+#AIME analysis 
+
+model, data, results = plot_price_mmlu_regression(
+    df_aime,
+    open_license_only=False,
+    price_column="Benchmark Cost USD",
+    exclude_dominated=False,
+    benchmark_col="oneshot_AIME",
     min_mmlu=2,
     max_mmlu=100,
     exclude_reasoning=False,

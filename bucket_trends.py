@@ -247,7 +247,7 @@ def plot_combined_record_small_trends(
             linestyle="--",
             linewidth=2.5,
             alpha=0.8,
-            label=f'{benchmark_col.split(" ")[0]} {min_mmlu}-{max_mmlu}% trend: ({annual_factor_rec:.1f}x cheaper/yr){ci_label}',
+            label=f"GPQA-D {min_mmlu}-{max_mmlu}% trend: ({annual_factor_rec:.1f}x cheaper/yr){ci_label}",
         )
 
         # Plot confidence intervals if we have enough data points and confidence_interval is True
@@ -331,7 +331,7 @@ def plot_combined_record_small_trends(
     #     ncol=2
     # )
     legend = ax.legend(
-        loc="upper left",
+        loc="upper right",
         fontsize=17,
         frameon=True,
         fancybox=True,

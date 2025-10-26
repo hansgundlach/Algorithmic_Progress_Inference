@@ -1,5 +1,4 @@
 # %%
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,26 +10,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # %%
-# df = pd.read_csv('inference_data_new_large.csv')
-# print("All columns in inference_data_new_large.csv:")
-# for i, col in enumerate(df.columns):
-#     print(f"{i}: {col}")
 
-
-# %%
-
-
-df = pd.read_csv("price_reduction_models.csv")
+df = pd.read_csv("inference_data_new_large.csv")
 print(df.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
 # df['Lowest Blended Price AA'] = df['Lowest Blended Price AA'].astype(float)
 # df['Blended\nUSD/1M Tokens'] = df['Blended\nUSD/1M Tokens'].str.replace('$', '').astype(float)
-
-
 # convert release date to datetime where release date is not nan
 df["Release Date"] = pd.to_datetime(df["Release Date"])
-
 
 # # Create Active Parameters column by choosing Known Active Parameters when available, otherwise use Parameters
 df["Active Parameters"] = np.where(
@@ -38,6 +26,7 @@ df["Active Parameters"] = np.where(
     df["Known Active Parameters"],
     df["Parameters"],
 )
+print(df.columns)
 
 
 # %%
@@ -59,7 +48,6 @@ def plot_benchmark_price_vs_time(
     quantile=0.5,
     record_price_trend=False,
     figsize=(14, 8),
-    benchmark_label="GPQA-Diamond",  # <-- New argument for label customization
 ):
     """
     Graph total price for any benchmark vs release date with overall fit capability.
@@ -82,7 +70,6 @@ def plot_benchmark_price_vs_time(
     - quantile: Quantile for quantile regression (default: 0.5 for median)
     - record_price_trend: If True, fit additional trend to record (maximum) prices over time
     - figsize: Figure size tuple
-    - benchmark_label: Custom label for the benchmark (e.g., "GPQA-Diamond", "Swe-Bench V")
 
     Returns:
     - model: Fitted regression model (record trend if record_price_trend=True, else overall trend)
@@ -476,8 +463,7 @@ def plot_benchmark_price_vs_time(
     )
     default_xlabel_text = "Date"
     default_ylabel_text = f'{price_col.replace("_", " ")} (USD)'
-    # Use the custom benchmark_label for colorbar and y-label
-    default_colorbar_label = f"{benchmark_label} Score"
+    default_colorbar_label = f"{benchmark_name} Score"
 
     ####################################################################################
     # GRAPH APPEARANCE SETTINGS - EDIT THIS SECTION TO CUSTOMIZE GRAPH LOOK
@@ -493,7 +479,7 @@ def plot_benchmark_price_vs_time(
     scatter_edge_color = "white"
     scatter_edge_width = 1.0  # Increased from 0.5
 
-    # Create scatter plot (main points)
+    # Create scatter plot
     scatter = plt.scatter(
         df_sub["Release Date"],
         df_sub[price_col],
@@ -503,18 +489,6 @@ def plot_benchmark_price_vs_time(
         s=scatter_size,
         edgecolors=scatter_edge_color,
         linewidth=scatter_edge_width,
-        zorder=3,
-    )
-
-    # Surround the dots with small black circles for visibility
-    plt.scatter(
-        df_sub["Release Date"],
-        df_sub[price_col],
-        facecolors="none",
-        edgecolors="black",
-        s=scatter_size * 1.25,  # slightly larger than main dot
-        linewidths=2,
-        zorder=4,
     )
 
     # Highlight record price points if using record price trend
@@ -535,12 +509,11 @@ def plot_benchmark_price_vs_time(
             edgecolors=record_highlight_color,
             linewidth=3,  # Increased from 2
             label="Record Price Models",
-            zorder=5,
         )
 
     # Colorbar settings - CUSTOMIZABLE SECTION
     colorbar_label = default_colorbar_label  # CUSTOMIZABLE - Change this line to set custom colorbar label
-    # colorbar_label = "GPQA-Diamond Score"  # Custom colorbar label (now handled by argument)
+    colorbar_label = "GPQA-Diamond Score"  # Custom colorbar label
     colorbar_fontsize = 22  # Increased from 16
     colorbar_tick_labelsize = 20  # Increased from 14
     colorbar_shrink = 1.0  # Controls colorbar height relative to plot
@@ -554,11 +527,7 @@ def plot_benchmark_price_vs_time(
     cbar.ax.tick_params(labelsize=colorbar_tick_labelsize)
 
     # Confidence interval settings (if applicable)
-    if (
-        "overall_ci_x_dates" in locals()
-        and overall_ci_x_dates is not None
-        and overall_ci_y_lower is not None
-    ):
+    if overall_ci_x_dates is not None and overall_ci_y_lower is not None:
         ci_alpha = 0.2
         ci_color = "blue"
         ci_label = "90% Confidence Interval (Overall)"
@@ -570,15 +539,10 @@ def plot_benchmark_price_vs_time(
             alpha=ci_alpha,
             color=ci_color,
             label=ci_label,
-            zorder=1,
         )
 
     # Overall trend line settings (if applicable)
-    if (
-        "overall_trend_x_dates" in locals()
-        and overall_trend_x_dates is not None
-        and overall_trend_y_pred is not None
-    ):
+    if overall_trend_x_dates is not None and overall_trend_y_pred is not None:
         overall_trend_color = "blue"
         overall_trend_linewidth = 4  # Increased from 3
         overall_trend_alpha = 0.8
@@ -590,15 +554,10 @@ def plot_benchmark_price_vs_time(
             linewidth=overall_trend_linewidth,
             alpha=overall_trend_alpha,
             label=overall_trend_label,
-            zorder=6,
         )
 
     # Record trend line settings (if applicable)
-    if (
-        "record_trend_x_dates" in locals()
-        and record_trend_x_dates is not None
-        and record_trend_y_pred is not None
-    ):
+    if record_trend_x_dates is not None and record_trend_y_pred is not None:
         record_trend_color = "red"
         record_trend_linewidth = 4  # Increased from 3
         record_trend_alpha = 0.8
@@ -612,7 +571,6 @@ def plot_benchmark_price_vs_time(
             alpha=record_trend_alpha,
             linestyle=record_trend_linestyle,
             label=record_trend_label,
-            zorder=7,
         )
 
     # Model name annotations (if requested)
@@ -630,7 +588,6 @@ def plot_benchmark_price_vs_time(
                 textcoords="offset points",
                 fontsize=annotation_fontsize,
                 alpha=annotation_alpha,
-                zorder=10,
             )
 
     # Y-axis settings
@@ -643,7 +600,7 @@ def plot_benchmark_price_vs_time(
     xlabel_fontweight = "bold"
 
     ylabel_text = default_ylabel_text  # CUSTOMIZABLE - Change this line to set custom y-axis label
-    ylabel_text = f"Benchmark Price ({benchmark_label})"
+    ylabel_text = "Benchmark Price (GPQA-Diamond)"
     ylabel_fontsize = 26  # Increased from 20
     ylabel_fontweight = "bold"
 
@@ -655,7 +612,7 @@ def plot_benchmark_price_vs_time(
         default_title_text  # CUSTOMIZABLE - Change this line to set custom title
     )
 
-    title_text = f"Benchmark Price ({benchmark_label}) vs Date"
+    title_text = "Benchmark Price (GPQA-Diamond) vs Date"
     title_fontsize = 28  # Increased from 20
     title_fontweight = "bold"
     title_pad = 20
@@ -779,30 +736,11 @@ def plot_benchmark_price_vs_time(
 
 
 # %%
-
-
-# Example usage for SWE:
+# Example usage for GPQA:
 plot_benchmark_price_vs_time(
-    csv_file="swe_price_reduction_models.csv",
-    price_col="Benchmark Cost USD",
+    csv_file="inference_data_new_large.csv",
+    price_col="total price swe",
     benchmark_col="epoch_swe",
-    open_license_only=False,
-    min_date="2024-01-01",
-    confidence_interval=False,
-    fit_overall_trend=True,
-    show_model_names=False,
-    use_quantile_regression=False, 
-    quantile=0.9,
-    record_price_trend=False,
-    benchmark_label="Swe-Bench V",  # <-- Example: change label here
-)
-# %%
-
-# Example Usage for GRQA-Diamond
-plot_benchmark_price_vs_time(
-    csv_file="price_reduction_models.csv",
-    price_col="Benchmark Cost USD",
-    benchmark_col="epoch_gpqa",
     open_license_only=False,
     min_date="2024-01-01",
     confidence_interval=False,
@@ -810,11 +748,6 @@ plot_benchmark_price_vs_time(
     show_model_names=False,
     use_quantile_regression=False,
     quantile=0.9,
-    record_price_trend=False,
-    benchmark_label="GPQA-Diamond",  # <-- Example: change label here
+    record_price_trend=True,
 )
-
 # %%
-
-
-

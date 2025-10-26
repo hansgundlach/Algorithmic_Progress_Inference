@@ -253,24 +253,54 @@ def process_price_history(
             output_price = row.get(output_price_col, np.nan)
 
             # Input tokens & price
-            if input_token_col and input_token_col in row and not pd.isna(row[input_token_col]):
+            if (
+                input_token_col
+                and input_token_col in row
+                and not pd.isna(row[input_token_col])
+            ):
                 if pd.isna(input_price):
-                    print(f"WARNING: Model '{model_name}' specifies input tokens ({input_token_col}={row[input_token_col]}) but is missing input price for {date_str} ({input_price_col})")
+                    print(
+                        f"WARNING: Model '{model_name}' specifies input tokens ({input_token_col}={row[input_token_col]}) but is missing input price for {date_str} ({input_price_col})"
+                    )
 
             # Output tokens & price
-            if output_token_col and output_token_col in row and not pd.isna(row[output_token_col]):
+            if (
+                output_token_col
+                and output_token_col in row
+                and not pd.isna(row[output_token_col])
+            ):
                 if pd.isna(output_price):
-                    print(f"WARNING: Model '{model_name}' specifies output tokens ({output_token_col}={row[output_token_col]}) but is missing output price for {date_str} ({output_price_col})")
+                    print(
+                        f"WARNING: Model '{model_name}' specifies output tokens ({output_token_col}={row[output_token_col]}) but is missing output price for {date_str} ({output_price_col})"
+                    )
 
             # Cache read tokens & price
-            if cache_read_token_col and cache_read_token_col in row and not pd.isna(row[cache_read_token_col]):
-                if cache_read_price_col and (cache_read_price_col not in row or pd.isna(row.get(cache_read_price_col, np.nan))):
-                    print(f"WARNING: Model '{model_name}' specifies cache read tokens ({cache_read_token_col}={row[cache_read_token_col]}) but is missing cache read price ({cache_read_price_col}) for {date_str}")
+            if (
+                cache_read_token_col
+                and cache_read_token_col in row
+                and not pd.isna(row[cache_read_token_col])
+            ):
+                if cache_read_price_col and (
+                    cache_read_price_col not in row
+                    or pd.isna(row.get(cache_read_price_col, np.nan))
+                ):
+                    print(
+                        f"WARNING: Model '{model_name}' specifies cache read tokens ({cache_read_token_col}={row[cache_read_token_col]}) but is missing cache read price ({cache_read_price_col}) for {date_str}"
+                    )
 
             # Cache write tokens & price
-            if cache_write_token_col and cache_write_token_col in row and not pd.isna(row[cache_write_token_col]):
-                if cache_write_price_col and (cache_write_price_col not in row or pd.isna(row.get(cache_write_price_col, np.nan))):
-                    print(f"WARNING: Model '{model_name}' specifies cache write tokens ({cache_write_token_col}={row[cache_write_token_col]}) but is missing cache write price ({cache_write_price_col}) for {date_str}")
+            if (
+                cache_write_token_col
+                and cache_write_token_col in row
+                and not pd.isna(row[cache_write_token_col])
+            ):
+                if cache_write_price_col and (
+                    cache_write_price_col not in row
+                    or pd.isna(row.get(cache_write_price_col, np.nan))
+                ):
+                    print(
+                        f"WARNING: Model '{model_name}' specifies cache write tokens ({cache_write_token_col}={row[cache_write_token_col]}) but is missing cache write price ({cache_write_price_col}) for {date_str}"
+                    )
         # --- END: Warn if tokens specified but price missing ---
 
         # Initialize price history for this model
@@ -488,7 +518,7 @@ def main():
     # CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
 
     # Column Specfication for SWE
-    # ================================================
+    # # ================================================
     # INPUT_FILE = "inference_data_new_large.csv"
     # OUTPUT_FILE = "swe_price_reduction_models.csv"
     # INPUT_TOKEN_COL = "input tokens swe"
@@ -500,16 +530,28 @@ def main():
 
     # Columns Specific to Frontier Math
     # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
-    INPUT_TOKEN_COL = "input tokens frontier"
-    OUTPUT_TOKEN_COL = "output tokens frontier"
-    CACHE_READ_TOKEN_COL = "cache read tokens frontier"
-    CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
-    CACHE_READ_PRICE_COL = "cache read cost "
-    CACHE_WRITE_PRICE_COL = "cache write cost"
+    # INPUT_FILE = "inference_data_new_large.csv"
+    # OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
+    # INPUT_TOKEN_COL = "input tokens frontier"
+    # OUTPUT_TOKEN_COL = "output tokens frontier"
+    # CACHE_READ_TOKEN_COL = "cache read tokens frontier"
+    # CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
+    # CACHE_READ_PRICE_COL = "cache read cost "
+    # CACHE_WRITE_PRICE_COL = "cache write cost"
 
     # Cache token columns (set to None to disable cache calculation)
+
+    # Columns specifc to AIME
+    # ================================================
+    INPUT_FILE = "inference_data_new_large.csv"
+    OUTPUT_FILE = "aime_price_reduction_models.csv"
+    INPUT_TOKEN_COL = "input tokens AIME"
+    OUTPUT_TOKEN_COL = "output tokens AIME"
+    # cache tokens are nto used for AIME
+    CACHE_READ_TOKEN_COL = "cache read tokens aiml"
+    CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
+    CACHE_READ_PRICE_COL = "cache read cost aiml"
+    CACHE_WRITE_PRICE_COL = "cache write cost aiml"
 
     # Set to True to see detailed processing information
     VERBOSE = True
@@ -559,6 +601,17 @@ def main():
         print(f"Generated {len(result_df)} rows with price reductions")
 
         if len(result_df) > 0:
+            # Count unique models (disregarding dates)
+            unique_models = set()
+            for model_name in result_df["Model"]:
+                # Remove date suffix to get base model name
+                base_model = model_name.rsplit(" ", 1)[0]
+                unique_models.add(base_model)
+
+            print(
+                f"Number of unique models (disregarding price change dates): {len(unique_models)}"
+            )
+
             # Save the result
             result_df.to_csv(OUTPUT_FILE, index=False)
             print(f"Saved results to {OUTPUT_FILE}")
