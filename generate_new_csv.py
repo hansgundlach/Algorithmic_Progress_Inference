@@ -48,6 +48,15 @@ def calculate_benchmark_cost(
     ):
         return np.nan
 
+    # Convert string values to numeric, handling any formatting issues
+    try:
+        input_tokens = float(input_tokens)
+        output_tokens = float(output_tokens)
+        input_price = float(input_price)
+        output_price = float(output_price)
+    except (ValueError, TypeError):
+        return np.nan
+
     # Convert to cost per token (prices are per million tokens)
     input_cost = (input_tokens * input_price) / 1_000_000
     output_cost = (output_tokens * output_price) / 1_000_000
@@ -65,10 +74,18 @@ def calculate_benchmark_cost(
         and not pd.isna(cache_read_price)
         and not pd.isna(cache_write_price)
     ):
+        try:
+            cache_read_tokens = float(cache_read_tokens)
+            cache_write_tokens = float(cache_write_tokens)
+            cache_read_price = float(cache_read_price)
+            cache_write_price = float(cache_write_price)
 
-        cache_read_cost = (cache_read_tokens * cache_read_price) / 1_000_000
-        cache_write_cost = (cache_write_tokens * cache_write_price) / 1_000_000
-        total_cost += cache_read_cost + cache_write_cost
+            cache_read_cost = (cache_read_tokens * cache_read_price) / 1_000_000
+            cache_write_cost = (cache_write_tokens * cache_write_price) / 1_000_000
+            total_cost += cache_read_cost + cache_write_cost
+        except (ValueError, TypeError):
+            # If cache conversion fails, continue without cache costs
+            pass
 
     return total_cost
 
@@ -519,14 +536,14 @@ def main():
 
     # Column Specfication for SWE
     # # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "swe_price_reduction_models.csv"
-    # INPUT_TOKEN_COL = "input tokens swe"
-    # OUTPUT_TOKEN_COL = "output tokens swe"
-    # CACHE_READ_TOKEN_COL = "cache reads swe"
-    # CACHE_WRITE_TOKEN_COL = "cache write swe"
-    # CACHE_READ_PRICE_COL = "cache read cost "
-    # CACHE_WRITE_PRICE_COL = "cache write cost"
+    INPUT_FILE = "inference_data_new_large.csv"
+    OUTPUT_FILE = "swe_price_reduction_models.csv"
+    INPUT_TOKEN_COL = "input tokens swe"
+    OUTPUT_TOKEN_COL = "output tokens swe"
+    CACHE_READ_TOKEN_COL = "cache reads swe"
+    CACHE_WRITE_TOKEN_COL = "cache write swe"
+    CACHE_READ_PRICE_COL = "cache read cost "
+    CACHE_WRITE_PRICE_COL = "cache write cost"
 
     # Columns Specific to Frontier Math
     # ================================================
@@ -543,15 +560,15 @@ def main():
 
     # Columns specifc to AIME
     # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "aime_price_reduction_models.csv"
-    INPUT_TOKEN_COL = "input tokens AIME"
-    OUTPUT_TOKEN_COL = "output tokens AIME"
-    # cache tokens are nto used for AIME
-    CACHE_READ_TOKEN_COL = "cache read tokens aiml"
-    CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
-    CACHE_READ_PRICE_COL = "cache read cost aiml"
-    CACHE_WRITE_PRICE_COL = "cache write cost aiml"
+    # INPUT_FILE = "inference_data_new_large.csv"
+    # OUTPUT_FILE = "aime_price_reduction_models.csv"
+    # INPUT_TOKEN_COL = "epoch_8_input"
+    # OUTPUT_TOKEN_COL = "epoch_8_output"
+    # # cache tokens are nto used for AIME
+    # CACHE_READ_TOKEN_COL = "cache read tokens aiml"
+    # CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
+    # CACHE_READ_PRICE_COL = "cache read cost aiml"
+    # CACHE_WRITE_PRICE_COL = "cache write cost aiml"
 
     # Set to True to see detailed processing information
     VERBOSE = True

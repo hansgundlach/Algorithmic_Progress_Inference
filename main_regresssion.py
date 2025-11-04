@@ -24,9 +24,10 @@ def plot_price_mmlu_regression(
     huber_epsilon=1.35,
     huber_max_iter=100,
     pareto_frontier_only=False,
+    use_logit=False,
 ):
     """
-    Plot log(Price) = alpha*time + beta*GPQA + c regression
+    Plot log(Price) = alpha*time + beta*benchmark + c regression
 
     Parameters:
     - df: DataFrame with the model data
@@ -41,6 +42,7 @@ def plot_price_mmlu_regression(
     - huber_epsilon: Epsilon parameter for HuberRegressor (default: 1.35)
     - huber_max_iter: Maximum iterations for HuberRegressor (default: 100)
     - pareto_frontier_only: If True, only use Pareto frontier models for the regression
+    - use_logit: If True, use logit transformation of benchmark scores (log(score/(100-score)))
 
     Returns fitted model coefficients and annual decrease rates
     """
@@ -57,6 +59,18 @@ def plot_price_mmlu_regression(
     df_work[mmlu_col] = (
         df_work[mmlu_col].astype(str).str.replace("%", "", regex=False).astype(float)
     )
+
+    # Apply logit transformation if requested
+    if use_logit:
+        # Convert percentage scores to proportions (0-1) and apply logit
+        # logit(p) = log(p / (1-p)) where p is the proportion
+        proportions = df_work[mmlu_col] / 100.0
+        # Avoid logit of 0 or 1 by clipping to avoid numerical issues
+        proportions = np.clip(proportions, 1e-10, 1 - 1e-10)
+        df_work[f"{mmlu_col}_logit"] = np.log(proportions / (1 - proportions))
+        mmlu_col_transformed = f"{mmlu_col}_logit"
+    else:
+        mmlu_col_transformed = mmlu_col
 
     # 2) Convert price "$X,XXX" → float
     df_work[price_col] = (
@@ -205,9 +219,12 @@ def plot_price_mmlu_regression(
         datetime.toordinal
     )
 
-    # Features: time and GPQA (not log of GPQA)
+    # Features: time and benchmark (with optional logit transformation)
     X = np.column_stack(
-        [df_regression["Date_Ordinal"].values, df_regression[mmlu_col].values]
+        [
+            df_regression["Date_Ordinal"].values,
+            df_regression[mmlu_col_transformed].values,
+        ]
     )
 
     # Target: log(Price)
@@ -287,9 +304,16 @@ def plot_price_mmlu_regression(
     x_range = np.linspace(min_ord, max_ord, 100)
     x_dates = [datetime.fromordinal(int(d)) for d in x_range]
 
-    # For visualization, we'll show the trend at median MMLU value
-    median_mmlu = df_regression[mmlu_col].median()
-    X_pred = np.column_stack([x_range, np.full(len(x_range), median_mmlu)])
+    # For visualization, we'll show the trend at median benchmark value
+    median_benchmark = df_regression[mmlu_col].median()
+    if use_logit:
+        # Convert median percentage to logit
+        median_proportion = median_benchmark / 100.0
+        median_proportion = np.clip(median_proportion, 1e-10, 1 - 1e-10)
+        median_logit = np.log(median_proportion / (1 - median_proportion))
+        X_pred = np.column_stack([x_range, np.full(len(x_range), median_logit)])
+    else:
+        X_pred = np.column_stack([x_range, np.full(len(x_range), median_benchmark)])
     y_pred_plot = model.predict(X_pred)
 
     # 14) Plot results
@@ -325,10 +349,11 @@ def plot_price_mmlu_regression(
     ]  # Extract the main part of the benchmark name
     cbar.set_label(f"{benchmark_name} Score (%)")
 
-    # Plot regression line (at median MMLU)
+    # Plot regression line (at median benchmark)
     data_source = "Pareto frontier only" if pareto_frontier_only else "all data"
+    transform_label = "logit" if use_logit else "linear"
     regression_label = (
-        f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_mmlu:.1f}%)\n"
+        f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_benchmark:.1f}%, {transform_label})\n"
         f"Annual change: {annual_pct_change:.2f}%/yr\n"
         f"Factor decrease: {factor_decrease_per_year:.3f}×/yr"
         + (
@@ -358,9 +383,10 @@ def plot_price_mmlu_regression(
         "Pareto frontier regression" if pareto_frontier_only else "standard regression"
     )
 
+    transform_desc = "logit" if use_logit else "linear"
     plt.title(
-        f"Price vs Time & {benchmark_name} {reg_type} Regression ({lic_label}, {mmlu_range}, {price_type}, {pareto_label}, {reasoning_label}, {frontier_label})\n"
-        f"log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name} + {c:.3f}"
+        f"Price vs Time & {benchmark_name} {reg_type} Regression ({lic_label}, {mmlu_range}, {price_type}, {pareto_label}, {reasoning_label}, {frontier_label}, {transform_desc})\n"
+        f"log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name}({transform_desc}) + {c:.3f}"
     )
 
     plt.grid(True, which="both", ls="--", alpha=0.4)
@@ -371,8 +397,9 @@ def plot_price_mmlu_regression(
     # Print detailed results
     print(f"\nRegression Results ({reg_type}):")
     print(f"Data used: {data_source}")
+    transform_desc = "logit" if use_logit else "linear"
     print(
-        f"Model: log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name} + {c:.3f}"
+        f"Model: log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name}({transform_desc}) + {c:.3f}"
     )
     print(f"R² score: {r2:.4f}")
     print(f"\nTime coefficient (alpha): {alpha:.6f}")
@@ -383,7 +410,7 @@ def plot_price_mmlu_regression(
             f"90% CI for factor decrease: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}]"
         )
 
-    print(f"{benchmark_name} coefficient (beta): {beta:.3f}")
+    print(f"{benchmark_name} coefficient (beta): {beta:.3f} ({transform_desc})")
     print(f"Intercept (c): {c:.3f}")
     print(f"\nData points used for regression: {len(df_regression)}")
     print(f"Data points displayed: {len(df_sub_display)}")
@@ -430,7 +457,8 @@ df_gpqa["Active Parameters"] = np.where(
     df_gpqa["Parameters"],
 )
 # %%
-df_swe = pd.read_csv("swe_price_reduction_models_edited.csv")
+# df_swe = pd.read_csv("swe_price_reduction_models_edited.csv")
+df_swe = pd.read_csv("swe_price_reduction_models.csv")
 print(df_swe.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -468,7 +496,7 @@ df_aime["Active Parameters"] = np.where(
     df_aime["Parameters"],
 )
 print(len(df_aime))
-#%%
+# %%
 # Index(['Model', 'Creator', 'License', 'Context\nWindow',
 #        'Artificial Analysis\nIntelligence Index',
 #        'MMLU-Pro (Reasoning & Knowledge)',
@@ -524,11 +552,12 @@ model, data, results = plot_price_mmlu_regression(
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
-    min_mmlu=25,
-    max_mmlu=85,
+    min_mmlu=0,
+    max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
     pareto_frontier_only=True,
+    use_logit=False,
 )
 # %%
 
@@ -538,11 +567,12 @@ model, data, results = plot_price_mmlu_regression(
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_swe",
-    min_mmlu=10,
+    min_mmlu=0,
     max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=True
+    pareto_frontier_only=True,
+    use_logit=True,
 )
 
 # %%
@@ -562,8 +592,8 @@ model, data, results = plot_price_mmlu_regression(
 # %%
 print(df_aime.columns)
 # print(df_aime['Benchmark Cost USD'])
-#%%
-#AIME analysis 
+# %%
+# AIME analysis
 
 model, data, results = plot_price_mmlu_regression(
     df_aime,
@@ -571,10 +601,27 @@ model, data, results = plot_price_mmlu_regression(
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="oneshot_AIME",
-    min_mmlu=2,
+    min_mmlu=0,
     max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=False,
+    pareto_frontier_only=True,
+    use_logit=True,
 )
+
+# %%
+# Example usage with logit transformation:
+# model, data, results = plot_price_mmlu_regression(
+#     df_aime,
+#     open_license_only=True,
+#     price_column="Benchmark Cost USD",
+#     exclude_dominated=False,
+#     benchmark_col="oneshot_AIME",
+#     min_mmlu=4,
+#     max_mmlu=100,
+#     exclude_reasoning=False,
+#     use_huber=False,
+#     pareto_frontier_only=True,
+#     use_logit=True,  # Enable logit transformation
+# )
 # %%
