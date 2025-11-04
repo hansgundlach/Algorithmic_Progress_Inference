@@ -2,20 +2,8 @@
 
 Code to analyse trends in inference prices to infer algorithmic progress in language model inference.
 
-![Inference Efficiency Trends](./trend_open.png)
+![Inference Efficiency Trends](./neurips_figures/trend_open.png)
 
-## How to Run
-
-To run the `main.py` script, execute the following command in your terminal:
-
-```bash
-python main.py
-```
-
-## How to Test
-
-To run the tests for this project, execute the following command in your terminal:
-
-```bash
-pytest test_main.py
-```
+Repository to study the technical economics of AI inference. 
+main_regression.py is sufficient to generate the main regression results in our table. 
+neurips_paper_graphs.ipynb generates the majority of graphs in our paper. 
