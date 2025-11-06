@@ -1,5 +1,6 @@
 # %%
 
+from tkinter.constants import FALSE
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -535,15 +536,16 @@ print(len(df_aime))
 # %%
 model, data, results = plot_price_mmlu_regression(
     df_gpqa,
-    open_license_only=False,
+    open_license_only=True,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
-    min_mmlu=25,
-    max_mmlu=85,
+    min_mmlu=20,
+    max_mmlu=90,
     exclude_reasoning=False,
     use_huber=False,
     pareto_frontier_only=True,
+    use_logit=True,
 )
 # %%
 model, data, results = plot_price_mmlu_regression(
@@ -557,13 +559,13 @@ model, data, results = plot_price_mmlu_regression(
     exclude_reasoning=False,
     use_huber=False,
     pareto_frontier_only=True,
-    use_logit=False,
+    use_logit=True,
 )
 # %%
 
 model, data, results = plot_price_mmlu_regression(
     df_swe,
-    open_license_only=True,
+    open_license_only=False,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_swe",
@@ -571,7 +573,7 @@ model, data, results = plot_price_mmlu_regression(
     max_mmlu=100,
     exclude_reasoning=False,
     use_huber=False,
-    pareto_frontier_only=False,
+    pareto_frontier_only=True,
     use_logit=True,
 )
 
@@ -597,7 +599,7 @@ print(df_aime.columns)
 
 model, data, results = plot_price_mmlu_regression(
     df_aime,
-    open_license_only=False,
+    open_license_only=True,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="oneshot_AIME",

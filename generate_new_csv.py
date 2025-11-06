@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import re
+import os
 
 
 def parse_date_from_column(col_name):
@@ -114,15 +115,22 @@ def process_price_history(
     cache_write_token_col=None,
     cache_read_price_col=None,
     cache_write_price_col=None,
+    epoch_column=None,
     verbose=False,
 ):
     """
     Process the dataframe to create new rows for each price reduction.
     Adds a blended price column (3:1 input:output).
     Optionally includes cache token costs if cache columns are provided.
+    Optionally normalizes benchmark costs to 16 epochs using epoch_column.
 
     Can work with or without token columns - if token columns are not provided,
     it will track price reductions based on blended price only.
+
+    Args:
+        epoch_column: Optional column name containing the number of epochs.
+                     All costs will be normalized to 16 epochs using the formula:
+                     normalized_cost = cost * (16 / epochs)
     """
 
     # Check if token columns are provided
@@ -146,6 +154,17 @@ def process_price_history(
                 "Will track price reductions based on blended price only (no benchmark cost calculation)."
             )
             use_token_cost = False
+
+    # Check if epoch column is provided and exists
+    use_epoch_normalization = False
+    if epoch_column:
+        if epoch_column not in df.columns:
+            print(f"Warning: Epoch column '{epoch_column}' not found in data.")
+            print("Proceeding without epoch normalization...")
+        else:
+            use_epoch_normalization = True
+            print(f"Using epoch normalization with column: {epoch_column}")
+            print("All benchmark costs will be normalized to 16 epochs.")
 
     # Check cache configuration
     use_cache = all(
@@ -260,6 +279,32 @@ def process_price_history(
             cache_read_tokens = cache_write_tokens = None
             cache_read_price = cache_write_price = None
 
+        # Get epoch data if using epoch normalization
+        epochs = None
+        epoch_normalization_factor = 1.0
+        if use_epoch_normalization:
+            epochs = row.get(epoch_column, np.nan)
+            if pd.isna(epochs) or epochs <= 0:
+                if verbose:
+                    print(
+                        f"  {model_name}: Missing or invalid epoch data, skipping row"
+                    )
+                continue  # Skip this row entirely if epoch data is missing when epoch column is provided
+
+            try:
+                epochs = float(epochs)
+                epoch_normalization_factor = 16.0 / epochs
+                if verbose:
+                    print(
+                        f"  {model_name}: Using {epochs} epochs, normalization factor: {epoch_normalization_factor:.4f}"
+                    )
+            except (ValueError, TypeError):
+                if verbose:
+                    print(
+                        f"  {model_name}: Invalid epoch value '{epochs}', skipping row"
+                    )
+                continue  # Skip this row if epoch value cannot be converted
+
         # --- BEGIN: Warn if tokens specified but price missing (per model/row) ---
         # For each date, check if tokens are specified but price is missing for input/output/cache
         for date_str in sorted_dates:
@@ -351,6 +396,9 @@ def process_price_history(
                     cache_read_price,
                     cache_write_price,
                 )
+                # Apply epoch normalization if enabled
+                if use_epoch_normalization and not pd.isna(current_metric):
+                    current_metric = current_metric * epoch_normalization_factor
                 metric_name = "cost"
             else:
                 current_metric = calculate_blended_price(input_price, output_price)
@@ -522,7 +570,7 @@ def main():
     # GPQA-Diamond Configuration
     # ================================================
     # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "price_reduction_models.csv"
+    # OUTPUT_FILE = "data/price_reduction_models.csv"
 
     # # Benchmark token columns (set to None to use only blended price tracking)
     # INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
@@ -534,41 +582,49 @@ def main():
     # CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
     # CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
 
+    # # Epoch column (set to None to disable epoch normalization)
+    # EPOCH_COLUMN = "gpqa_epochs"  # e.g., "epochs_gpqa"
+
     # Column Specfication for SWE
     # # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "swe_price_reduction_models.csv"
-    INPUT_TOKEN_COL = "input tokens swe"
-    OUTPUT_TOKEN_COL = "output tokens swe"
-    CACHE_READ_TOKEN_COL = "cache reads swe"
-    CACHE_WRITE_TOKEN_COL = "cache write swe"
-    CACHE_READ_PRICE_COL = "cache read cost "
-    CACHE_WRITE_PRICE_COL = "cache write cost"
+    # INPUT_FILE = "inference_data_new_large.csv"
+    # OUTPUT_FILE = "data/swe_price_reduction_models.csv"
+    # INPUT_TOKEN_COL = "input tokens swe"
+    # OUTPUT_TOKEN_COL = "output tokens swe"
+    # CACHE_READ_TOKEN_COL = "cache reads swe"
+    # CACHE_WRITE_TOKEN_COL = "cache write swe"
+    # CACHE_READ_PRICE_COL = "cache read cost "
+    # CACHE_WRITE_PRICE_COL = "cache write cost"
+    # EPOCH_COLUMN = (
+    #     None  # e.g., "epochs_swe" - set to None to disable epoch normalization
+    # )
 
     # Columns Specific to Frontier Math
     # ================================================
     # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "frontier_math_price_reduction_models.csv"
+    # OUTPUT_FILE = "data/frontier_math_price_reduction_models.csv"
     # INPUT_TOKEN_COL = "input tokens frontier"
     # OUTPUT_TOKEN_COL = "output tokens frontier"
     # CACHE_READ_TOKEN_COL = "cache read tokens frontier"
     # CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
     # CACHE_READ_PRICE_COL = "cache read cost "
     # CACHE_WRITE_PRICE_COL = "cache write cost"
+    # EPOCH_COLUMN = None  # e.g., "epochs_frontier" - set to None to disable epoch normalization
 
     # Cache token columns (set to None to disable cache calculation)
 
     # Columns specifc to AIME
     # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "aime_price_reduction_models.csv"
-    # INPUT_TOKEN_COL = "epoch_8_input"
-    # OUTPUT_TOKEN_COL = "epoch_8_output"
-    # # cache tokens are nto used for AIME
-    # CACHE_READ_TOKEN_COL = "cache read tokens aiml"
-    # CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
-    # CACHE_READ_PRICE_COL = "cache read cost aiml"
-    # CACHE_WRITE_PRICE_COL = "cache write cost aiml"
+    INPUT_FILE = "inference_data_new_large.csv"
+    OUTPUT_FILE = "data/aime_price_reduction_models.csv"
+    INPUT_TOKEN_COL = "input tokens AIME"
+    OUTPUT_TOKEN_COL = "output tokens AIME"
+    # cache tokens are nto used for AIME
+    CACHE_READ_TOKEN_COL = "cache read tokens aiml"
+    CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
+    CACHE_READ_PRICE_COL = "cache read cost aiml"
+    CACHE_WRITE_PRICE_COL = "cache write cost aiml"
+    EPOCH_COLUMN = "AIME_epochs"  # e.g., "epochs_aime" - set to None to disable epoch normalization
 
     # Set to True to see detailed processing information
     VERBOSE = True
@@ -612,6 +668,7 @@ def main():
             CACHE_WRITE_TOKEN_COL,
             CACHE_READ_PRICE_COL,
             CACHE_WRITE_PRICE_COL,
+            EPOCH_COLUMN,
             verbose=VERBOSE,
         )
 
@@ -628,6 +685,12 @@ def main():
             print(
                 f"Number of unique models (disregarding price change dates): {len(unique_models)}"
             )
+
+            # Ensure data directory exists
+            output_dir = os.path.dirname(OUTPUT_FILE)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
+                print(f"Created directory: {output_dir}")
 
             # Save the result
             result_df.to_csv(OUTPUT_FILE, index=False)

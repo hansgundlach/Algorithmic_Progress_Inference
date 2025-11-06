@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression, QuantileRegressor
 from scipy import stats
 from datetime import datetime
 import warnings
+import os
 
 warnings.filterwarnings("ignore")
 
@@ -20,7 +21,7 @@ warnings.filterwarnings("ignore")
 # %%
 
 
-df = pd.read_csv("price_reduction_models.csv")
+df = pd.read_csv("data/price_reduction_models.csv")
 print(df.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -60,6 +61,7 @@ def plot_benchmark_price_vs_time(
     record_price_trend=False,
     figsize=(14, 8),
     benchmark_label="GPQA-Diamond",  # <-- New argument for label customization
+    save_path=None,  # <-- Path to save the figure (e.g., "figures/swe_total_bench.png")
 ):
     """
     Graph total price for any benchmark vs release date with overall fit capability.
@@ -83,6 +85,7 @@ def plot_benchmark_price_vs_time(
     - record_price_trend: If True, fit additional trend to record (maximum) prices over time
     - figsize: Figure size tuple
     - benchmark_label: Custom label for the benchmark (e.g., "GPQA-Diamond", "Swe-Bench V")
+    - save_path: Optional path to save the figure (e.g., "figures/swe_total_bench.png"). If None, figure is only displayed.
 
     Returns:
     - model: Fitted regression model (record trend if record_price_trend=True, else overall trend)
@@ -717,6 +720,18 @@ def plot_benchmark_price_vs_time(
     # END GRAPH APPEARANCE SETTINGS
     ####################################################################################
 
+    # Save figure if save_path is provided
+    if save_path is not None:
+        # Ensure directory exists
+        output_dir = os.path.dirname(save_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir, exist_ok=True)
+            print(f"Created directory: {output_dir}")
+
+        # Save the figure
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        print(f"Figure saved to: {save_path}")
+
     plt.show()
 
     # 9) Print summary statistics
@@ -783,7 +798,7 @@ def plot_benchmark_price_vs_time(
 
 # Example usage for SWE:
 plot_benchmark_price_vs_time(
-    csv_file="swe_price_reduction_models.csv",
+    csv_file="data/swe_price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_swe",
     open_license_only=False,
@@ -791,16 +806,17 @@ plot_benchmark_price_vs_time(
     confidence_interval=False,
     fit_overall_trend=True,
     show_model_names=False,
-    use_quantile_regression=False, 
+    use_quantile_regression=False,
     quantile=0.9,
     record_price_trend=False,
     benchmark_label="Swe-Bench V",  # <-- Example: change label here
+    save_path="figures/swe_total_bench.png",  # <-- Example: save figure to file
 )
 # %%
 
 # Example Usage for GRQA-Diamond
 plot_benchmark_price_vs_time(
-    csv_file="price_reduction_models.csv",
+    csv_file="data/price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_gpqa",
     open_license_only=False,
@@ -812,9 +828,7 @@ plot_benchmark_price_vs_time(
     quantile=0.9,
     record_price_trend=False,
     benchmark_label="GPQA-Diamond",  # <-- Example: change label here
+    save_path="figures/gpqa_total_bench.png",  # <-- Example: save figure to file
 )
 
 # %%
-
-
-
