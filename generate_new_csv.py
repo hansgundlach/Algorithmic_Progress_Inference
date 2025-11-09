@@ -918,7 +918,7 @@ def main():
         {
             "name": "GPQA-Diamond",
             "input_file": "data/inference_data_new_large.csv",
-            "output_file": "data/test_price_reduction_models.csv",
+            "output_file": "data/price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
             "reasoning_token_col": None,
@@ -966,7 +966,7 @@ def main():
     ]
 
     # Set to True to see detailed processing information
-    VERBOSE = True
+    VERBOSE = False
 
     print("=" * 60)
     print("Model Price Reduction History Generator (BLENDED PRICE)")
