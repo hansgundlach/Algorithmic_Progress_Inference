@@ -26,6 +26,8 @@ def plot_price_mmlu_regression(
     huber_max_iter=100,
     pareto_frontier_only=False,
     use_logit=False,
+    show_plot=True,  # <-- new argument to control plotting
+    show_model_names=False,  # <-- new argument to show model names for red circled points
 ):
     """
     Plot log(Price) = alpha*time + beta*benchmark + c regression
@@ -44,6 +46,8 @@ def plot_price_mmlu_regression(
     - huber_max_iter: Maximum iterations for HuberRegressor (default: 100)
     - pareto_frontier_only: If True, only use Pareto frontier models for the regression
     - use_logit: If True, use logit transformation of benchmark scores (log(score/(100-score)))
+    - show_plot: If True, display the regression plot (default: True)
+    - show_model_names: If True, display model names for red-circled Pareto frontier points (default: False)
 
     Returns fitted model coefficients and annual decrease rates
     """
@@ -297,6 +301,11 @@ def plot_price_mmlu_regression(
         factor_decrease_lower = None
         factor_decrease_upper = None
 
+    # Extract benchmark name for labels (needed for both plotting and printing)
+    benchmark_name = benchmark_col.split(" (")[
+        0
+    ]  # Extract the main part of the benchmark name
+
     # 13) Generate predictions for plotting
     min_ord, max_ord = (
         df_regression["Date_Ordinal"].min(),
@@ -317,88 +326,107 @@ def plot_price_mmlu_regression(
         X_pred = np.column_stack([x_range, np.full(len(x_range), median_benchmark)])
     y_pred_plot = model.predict(X_pred)
 
-    # 14) Plot results
-    plt.figure(figsize=(12, 8))
+    # 14) Plot results, only if show_plot is True
+    if show_plot:
+        plt.figure(figsize=(12, 8))
 
-    # Color points by MMLU score for better visualization (use display data)
-    scatter = plt.scatter(
-        df_sub_display["Release Date"],
-        df_sub_display[price_col],
-        c=df_sub_display[mmlu_col],
-        cmap="viridis",
-        alpha=0.7,
-        s=60,
-        label="Data points",
-    )
-
-    # If using Pareto frontier for regression, highlight those points
-    if pareto_frontier_only:
-        plt.scatter(
-            df_regression["Release Date"],
-            df_regression[price_col],
-            facecolors="none",
-            edgecolors="red",
-            s=100,
-            linewidth=2,
-            label="Pareto frontier (used for regression)",
+        # Color points by MMLU score for better visualization (use display data)
+        scatter = plt.scatter(
+            df_sub_display["Release Date"],
+            df_sub_display[price_col],
+            c=df_sub_display[mmlu_col],
+            cmap="viridis",
+            alpha=0.7,
+            s=60,
+            label="Data points",
         )
 
-    # Add colorbar for MMLU scores
-    cbar = plt.colorbar(scatter)
-    benchmark_name = benchmark_col.split(" (")[
-        0
-    ]  # Extract the main part of the benchmark name
-    cbar.set_label(f"{benchmark_name} Score (%)")
+        # If using Pareto frontier for regression, highlight those points
+        if pareto_frontier_only:
+            plt.scatter(
+                df_regression["Release Date"],
+                df_regression[price_col],
+                facecolors="none",
+                edgecolors="red",
+                s=100,
+                linewidth=2,
+                label="Pareto frontier (used for regression)",
+            )
 
-    # Plot regression line (at median benchmark)
-    data_source = "Pareto frontier only" if pareto_frontier_only else "all data"
-    transform_label = "logit" if use_logit else "linear"
-    regression_label = (
-        f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_benchmark:.1f}%, {transform_label})\n"
-        f"Annual change: {annual_pct_change:.2f}%/yr\n"
-        f"Factor decrease: {factor_decrease_per_year:.3f}×/yr"
-        + (
-            f" (90% CI: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}])"
-            if factor_decrease_lower is not None
-            else ""
+            # Add model name annotations if requested
+            if show_model_names and "Model" in df_regression.columns:
+                for idx, row in df_regression.iterrows():
+                    model_name = row["Model"]
+                    plt.annotate(
+                        model_name,
+                        (row["Release Date"], row[price_col]),
+                        xytext=(5, 5),
+                        textcoords="offset points",
+                        fontsize=8,
+                        alpha=0.7,
+                        bbox=dict(
+                            boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.5
+                        ),
+                    )
+
+        # Add colorbar for MMLU scores
+        cbar = plt.colorbar(scatter)
+        cbar.set_label(f"{benchmark_name} Score (%)")
+
+        # Plot regression line (at median benchmark)
+        data_source = "Pareto frontier only" if pareto_frontier_only else "all data"
+        transform_label = "logit" if use_logit else "linear"
+        regression_label = (
+            f"{reg_type} Regression ({data_source}, at median {benchmark_name}={median_benchmark:.1f}%, {transform_label})\n"
+            f"Annual change: {annual_pct_change:.2f}%/yr\n"
+            f"Factor decrease: {factor_decrease_per_year:.3f}×/yr"
+            + (
+                f" (90% CI: [{factor_decrease_lower:.3f}, {factor_decrease_upper:.3f}])"
+                if factor_decrease_lower is not None
+                else ""
+            )
+            + f"\nR² = {r2:.3f}"
         )
-        + f"\nR² = {r2:.3f}"
-    )
 
-    plt.plot(x_dates, np.exp(y_pred_plot), "r-", lw=3, label=regression_label)
+        plt.plot(x_dates, np.exp(y_pred_plot), "r-", lw=3, label=regression_label)
 
-    plt.yscale("log")
-    plt.xlabel("Release Date")
-    plt.ylabel("Price (USD per 1M tokens)")
+        plt.yscale("log")
+        plt.xlabel("Release Date")
+        plt.ylabel("Price (USD per 1M tokens)")
 
-    lic_label = "open-license only" if open_license_only else "all licenses"
-    mmlu_range = f"{benchmark_name} ∈ [{min_mmlu},{max_mmlu}]%"
-    price_type = price_col.replace("\n", " ")
-    pareto_label = "non-dominated models only" if exclude_dominated else "all models"
-    reasoning_label = (
-        "excluding reasoning models"
-        if exclude_reasoning
-        else "including reasoning models"
-    )
-    frontier_label = (
-        "Pareto frontier regression" if pareto_frontier_only else "standard regression"
-    )
+        lic_label = "open-license only" if open_license_only else "all licenses"
+        mmlu_range = f"{benchmark_name} ∈ [{min_mmlu},{max_mmlu}]%"
+        price_type = price_col.replace("\n", " ")
+        pareto_label = (
+            "non-dominated models only" if exclude_dominated else "all models"
+        )
+        reasoning_label = (
+            "excluding reasoning models"
+            if exclude_reasoning
+            else "including reasoning models"
+        )
+        frontier_label = (
+            "Pareto frontier regression"
+            if pareto_frontier_only
+            else "standard regression"
+        )
 
-    transform_desc = "logit" if use_logit else "linear"
-    plt.title(
-        f"Price vs Time & {benchmark_name} {reg_type} Regression ({lic_label}, {mmlu_range}, {price_type}, {pareto_label}, {reasoning_label}, {frontier_label}, {transform_desc})\n"
-        f"log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name}({transform_desc}) + {c:.3f}"
-    )
+        transform_desc = "logit" if use_logit else "linear"
+        plt.title(
+            f"Price vs Time & {benchmark_name} {reg_type} Regression ({lic_label}, {mmlu_range}, {price_type}, {pareto_label}, {reasoning_label}, {frontier_label}, {transform_desc})\n"
+            f"log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name}({transform_desc}) + {c:.3f}"
+        )
 
-    plt.grid(True, which="both", ls="--", alpha=0.4)
-    plt.legend(loc="best")
-    plt.tight_layout()
-    plt.show()
+        plt.grid(True, which="both", ls="--", alpha=0.4)
+        plt.legend(loc="best")
+        plt.tight_layout()
+        plt.show()
 
     # Print detailed results
     print(f"\nRegression Results ({reg_type}):")
-    print(f"Data used: {data_source}")
+    data_source = "Pareto frontier only" if pareto_frontier_only else "all data"
     transform_desc = "logit" if use_logit else "linear"
+    print(f"Data used: {data_source}")
     print(
         f"Model: log(Price) = {alpha:.6f}×time + {beta:.3f}×{benchmark_name}({transform_desc}) + {c:.3f}"
     )
@@ -439,7 +467,7 @@ def plot_price_mmlu_regression(
 
 # %%
 
-df_gpqa = pd.read_csv("price_reduction_models.csv")
+df_gpqa = pd.read_csv("data/price_reduction_models.csv")
 print(df_gpqa.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -459,7 +487,7 @@ df_gpqa["Active Parameters"] = np.where(
 )
 # %%
 # df_swe = pd.read_csv("swe_price_reduction_models_edited.csv")
-df_swe = pd.read_csv("swe_price_reduction_models.csv")
+df_swe = pd.read_csv("data/swe_price_reduction_models.csv")
 print(df_swe.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -475,7 +503,7 @@ df_swe["Active Parameters"] = np.where(
 )
 
 # %%
-df_frontier_math = pd.read_csv("frontier_math_price_reduction_models.csv")
+df_frontier_math = pd.read_csv("data/frontier_math_price_reduction_models.csv")
 
 df_frontier_math["Release Date"] = pd.to_datetime(df_frontier_math["Release Date"])
 # # Create Active Parameters column by choosing Known Active Parameters when available, otherwise use Parameters
@@ -486,7 +514,7 @@ df_frontier_math["Active Parameters"] = np.where(
 )
 # %%
 
-df_aime = pd.read_csv("aime_price_reduction_models.csv")
+df_aime = pd.read_csv("data/aime_price_reduction_models.csv")
 # print(df_aime.columns)
 # convert release date to datetime where release date is not nan
 df_aime["Release Date"] = pd.to_datetime(df_aime["Release Date"])
@@ -536,7 +564,7 @@ print(len(df_aime))
 # %%
 model, data, results = plot_price_mmlu_regression(
     df_gpqa,
-    open_license_only=True,
+    open_license_only=False,
     price_column="Benchmark Cost USD",
     exclude_dominated=False,
     benchmark_col="epoch_gpqa",
@@ -575,6 +603,7 @@ model, data, results = plot_price_mmlu_regression(
     use_huber=False,
     pareto_frontier_only=True,
     use_logit=True,
+    show_model_names=True,
 )
 
 # %%
@@ -592,10 +621,6 @@ model, data, results = plot_price_mmlu_regression(
     pareto_frontier_only=True,
 )
 # %%
-print(df_aime.columns)
-# print(df_aime['Benchmark Cost USD'])
-# %%
-# AIME analysis
 
 model, data, results = plot_price_mmlu_regression(
     df_aime,
@@ -626,4 +651,217 @@ model, data, results = plot_price_mmlu_regression(
 #     pareto_frontier_only=True,
 #     use_logit=True,  # Enable logit transformation
 # )
+# %%
+
+
+# Create comprehensive comparison table
+def create_comparison_table(hardware_gain_factor=1.0):
+    """
+    Create a table comparing different regression configurations across benchmarks.
+
+    Parameters:
+    - hardware_gain_factor: Factor to divide year decrease factors and CIs by (default: 1.0)
+                           Use this to adjust for hardware improvements over time
+    """
+    # Define configurations
+    configurations = [
+        {
+            "name": "Pareto_restricted_all_license",
+            "pareto_frontier_only": True,
+            "open_license_only": False,
+        },
+        {
+            "name": "pareto_restricted_open_license",
+            "pareto_frontier_only": True,
+            "open_license_only": True,
+        },
+        {
+            "name": "all_license_no_restriction",
+            "pareto_frontier_only": False,
+            "open_license_only": False,
+        },
+        {
+            "name": "open_license_only_no_restriction",
+            "pareto_frontier_only": False,
+            "open_license_only": True,
+        },
+    ]
+
+    # Define benchmarks with their configurations
+    benchmarks = [
+        {
+            "name": "GPQA",
+            "df": df_gpqa,
+            "benchmark_col": "epoch_gpqa",
+            "min_mmlu": 20,
+            "max_mmlu": 90,
+            "use_logit": True,
+        },
+        {
+            "name": "AIME",
+            "df": df_aime,
+            "benchmark_col": "oneshot_AIME",
+            "min_mmlu": 0,
+            "max_mmlu": 100,
+            "use_logit": True,
+        },
+        {
+            "name": "SWE-Bench",
+            "df": df_swe,
+            "benchmark_col": "epoch_swe",
+            "min_mmlu": 0,
+            "max_mmlu": 100,
+            "use_logit": True,
+        },
+    ]
+
+    # Collect results
+    results_data = []
+
+    for benchmark in benchmarks:
+        for config in configurations:
+            print(f"\nProcessing {benchmark['name']} - {config['name']}...")
+
+            # Run regression without showing plot
+            model, data, results = plot_price_mmlu_regression(
+                df=benchmark["df"],
+                open_license_only=config["open_license_only"],
+                price_column="Benchmark Cost USD",
+                exclude_dominated=False,
+                benchmark_col=benchmark["benchmark_col"],
+                min_mmlu=benchmark["min_mmlu"],
+                max_mmlu=benchmark["max_mmlu"],
+                exclude_reasoning=False,
+                use_huber=False,
+                pareto_frontier_only=config["pareto_frontier_only"],
+                use_logit=benchmark["use_logit"],
+                show_plot=False,  # Don't show plots for table generation
+            )
+
+            # Extract results if regression was successful
+            if results is not None:
+                factor_decrease = results["factor_decrease_per_year"]
+                ci_lower = results["factor_decrease_ci_lower"]
+                ci_upper = results["factor_decrease_ci_upper"]
+                r2 = results["r2_score"]
+                n = len(data) if data is not None else 0
+
+                # Apply hardware gain factor adjustment
+                factor_decrease_adjusted = factor_decrease / hardware_gain_factor
+
+                # Format CI string with hardware gain factor adjustment
+                if ci_lower is not None and ci_upper is not None:
+                    ci_lower_adjusted = ci_lower / hardware_gain_factor
+                    ci_upper_adjusted = ci_upper / hardware_gain_factor
+                    ci_str = f"[{ci_lower_adjusted:.3f}, {ci_upper_adjusted:.3f}]"
+                else:
+                    ci_str = "N/A"
+
+                results_data.append(
+                    {
+                        "Benchmark": benchmark["name"],
+                        "Configuration": config["name"],
+                        "Annual Factor Decrease": f"{factor_decrease_adjusted:.3f}",
+                        "90% CI": ci_str,
+                        "n": n,
+                        "R²": f"{r2:.4f}",
+                    }
+                )
+            else:
+                # If regression failed, add placeholder
+                results_data.append(
+                    {
+                        "Benchmark": benchmark["name"],
+                        "Configuration": config["name"],
+                        "Annual Factor Decrease": "N/A",
+                        "90% CI": "N/A",
+                        "n": 0,
+                        "R²": "N/A",
+                    }
+                )
+
+    # Create DataFrame with long format (benchmark sections with multiple rows)
+    results_df = pd.DataFrame(results_data)
+
+    # Reorder to match desired format
+    results_df = results_df[
+        ["Benchmark", "Configuration", "Annual Factor Decrease", "90% CI", "n", "R²"]
+    ]
+
+    # Rename columns to match table headers
+    results_df.columns = [
+        "Benchmark",
+        "Restriction",
+        "Year Decrease Factor",
+        "90% CI",
+        "n",
+        "R²",
+    ]
+
+    # Reorder rows: group by benchmark, with configurations in the desired order
+    benchmark_order = ["GPQA", "AIME", "SWE-Bench"]
+    config_order = [
+        "Pareto_restricted_all_license",
+        "pareto_restricted_open_license",
+        "all_license_no_restriction",
+        "open_license_only_no_restriction",
+    ]
+
+    # Create ordered dataframe
+    ordered_rows = []
+    for benchmark in benchmark_order:
+        for config in config_order:
+            row = results_df[
+                (results_df["Benchmark"] == benchmark)
+                & (results_df["Restriction"] == config)
+            ]
+            if not row.empty:
+                ordered_rows.append(row)
+
+    results_df = pd.concat(ordered_rows, ignore_index=True)
+
+    # Clean up restriction names to match your format
+    restriction_mapping = {
+        "Pareto_restricted_all_license": "Pareto Restricted All License",
+        "pareto_restricted_open_license": "Pareto Restricted Open License",
+        "all_license_no_restriction": "All License (no restriction)",
+        "open_license_only_no_restriction": "Open License (no restriction)",
+    }
+    results_df["Restriction"] = results_df["Restriction"].map(restriction_mapping)
+
+    # For each benchmark group, only show benchmark name in first row
+    for i in range(1, len(results_df)):
+        if results_df.loc[i, "Benchmark"] == results_df.loc[i - 1, "Benchmark"]:
+            results_df.loc[i, "Benchmark"] = ""
+
+    return results_df
+
+
+# Generate and display the table
+print("\n" + "=" * 80)
+print("COMPREHENSIVE COMPARISON TABLE")
+print("=" * 80 + "\n")
+# Set hardware_gain_factor to adjust for hardware improvements (default is 1.0, no adjustment)
+# For example, hardware_gain_factor=2.0 would divide all year decrease factors by 2
+comparison_table = create_comparison_table(hardware_gain_factor=1.0)
+print("\n")
+print(comparison_table.to_string(index=False))
+print("\n")
+
+# Save to CSV
+comparison_table.to_csv("regression_comparison_table.csv", index=False)
+print("Table saved to 'regression_comparison_table.csv'")
+
+# Save to LaTeX
+latex_table = comparison_table.to_latex(
+    index=False,
+    escape=False,
+    column_format="|l|l|c|c|c|c|",
+    caption="Regression Results Across Benchmarks and Restrictions",
+    label="tab:regression_results_restructured",
+)
+with open("regression_comparison_table.tex", "w") as f:
+    f.write(latex_table)
+print("LaTeX table saved to 'regression_comparison_table.tex'")
+
 # %%

@@ -12,7 +12,27 @@ Key features:
 4. Blended price column removal for all other historical columns
 5. Better duplicate detection
 6. Optional cache token cost calculation
-7. Works with or without token count columns (with warning when not specified)
+7. Optional reasoning token cost calculation (conditionally added to output tokens)
+8. Reasoning_in_output flag to control whether reasoning tokens are already in output or need to be added
+9. Cache_in_input and cache_in_output flags to control whether cache tokens are included in token counts
+10. Works with or without token count columns (with warning when not specified)
+11. Error handling for mismatched token/price availability
+12. Validation that reasoning_in_output is specified when reasoning tokens are present
+
+Cost Formula:
+    ((input_tokens * input_price) +
+     ((output_tokens [+ reasoning_tokens if not in output]) * output_price) +
+     (cache_read * cache_read_price) +
+     (cache_write * cache_write_price)) * epoch_normalization
+
+Notes:
+- Epoch normalization: All costs are normalized to 1 epoch using: normalized_cost = cost * (1 / epochs)
+- If cache_in_input=True: cache_read tokens are already included in input_tokens, so we subtract them
+  and charge separately: (input_tokens - cache_read) * input_price + cache_read * cache_read_price
+- If cache_in_input=False: cache tokens are separate, use: input_tokens * input_price + cache_read * cache_read_price
+- Same logic applies for cache_in_output with cache_write tokens
+- Reasoning tokens are only added to output if reasoning_in_output=False.
+  If reasoning_in_output=True, reasoning tokens are already included in output_tokens.
 """
 
 import pandas as pd
@@ -35,17 +55,70 @@ def calculate_benchmark_cost(
     output_tokens,
     input_price,
     output_price,
+    reasoning_tokens=None,
+    reasoning_in_output=None,
     cache_read_tokens=None,
     cache_write_tokens=None,
     cache_read_price=None,
     cache_write_price=None,
+    cache_in_input=None,
+    cache_in_output=None,
 ):
-    """Calculate total cost to run benchmark given token counts and prices per million tokens"""
+    """
+    Calculate total cost to run benchmark given token counts and prices per million tokens.
+    Formula: (input_tokens * input_price + output_tokens * output_price +
+              cache_read * cache_read_price + cache_write * cache_write_price)
+
+    With adjustments based on flags:
+    - If cache_in_input=True: (input_tokens - cache_read) * input_price + cache_read * cache_read_price
+    - If cache_in_output=True: (output_tokens - cache_write) * output_price + cache_write * cache_write_price
+
+    Args:
+        reasoning_tokens: Optional reasoning tokens (defaults to 0)
+        reasoning_in_output: Boolean flag indicating if reasoning tokens are already included in output_tokens.
+                           If True, reasoning tokens are NOT added to output (already included).
+                           If False, reasoning tokens ARE added to output.
+                           Must not be None/NA if reasoning_tokens is provided.
+        cache_in_input: Boolean flag indicating if cache_read tokens are already included in input_tokens.
+                       If True, subtract cache_read from input_tokens before applying input_price.
+                       If False/None, cache tokens are separate.
+        cache_in_output: Boolean flag indicating if cache_write tokens are already included in output_tokens.
+                        If True, subtract cache_write from output_tokens before applying output_price.
+                        If False/None, cache tokens are separate.
+
+    Raises:
+        ValueError: If input_price is available but output_price is not, or vice versa
+        ValueError: If input_tokens is available but output_tokens is not, or vice versa
+        ValueError: If reasoning_tokens is provided but reasoning_in_output is None/NA
+    """
+    # Check for mismatches in token numbers
+    has_input_tokens = not pd.isna(input_tokens)
+    has_output_tokens = not pd.isna(output_tokens)
+
+    if has_input_tokens != has_output_tokens:
+        raise ValueError(
+            f"Token number mismatch: input_tokens={'available' if has_input_tokens else 'missing'}, "
+            f"output_tokens={'available' if has_output_tokens else 'missing'}. "
+            f"Both must be available or both must be missing."
+        )
+
+    # Check for mismatches in token prices
+    has_input_price = not pd.isna(input_price)
+    has_output_price = not pd.isna(output_price)
+
+    if has_input_price != has_output_price:
+        raise ValueError(
+            f"Token price mismatch: input_price={'available' if has_input_price else 'missing'}, "
+            f"output_price={'available' if has_output_price else 'missing'}. "
+            f"Both must be available or both must be missing."
+        )
+
+    # If any required value is missing, return NaN
     if (
-        pd.isna(input_tokens)
-        or pd.isna(output_tokens)
-        or pd.isna(input_price)
-        or pd.isna(output_price)
+        not has_input_tokens
+        or not has_output_tokens
+        or not has_input_price
+        or not has_output_price
     ):
         return np.nan
 
@@ -58,14 +131,39 @@ def calculate_benchmark_cost(
     except (ValueError, TypeError):
         return np.nan
 
-    # Convert to cost per token (prices are per million tokens)
-    input_cost = (input_tokens * input_price) / 1_000_000
-    output_cost = (output_tokens * output_price) / 1_000_000
+    # Handle reasoning tokens (default to 0 if not provided)
+    reasoning_tokens_value = 0.0
+    add_reasoning_to_output = False
 
-    total_cost = input_cost + output_cost
+    if reasoning_tokens is not None and not pd.isna(reasoning_tokens):
+        try:
+            reasoning_tokens_value = float(reasoning_tokens)
 
-    # Add cache costs if available
-    if (
+            # If reasoning tokens are present, reasoning_in_output must be specified
+            if reasoning_tokens_value > 0:
+                if reasoning_in_output is None or pd.isna(reasoning_in_output):
+                    raise ValueError(
+                        f"reasoning_in_output must be specified (True/False) when reasoning_tokens is provided (reasoning_tokens={reasoning_tokens_value})"
+                    )
+
+                # If reasoning_in_output is False, we need to ADD reasoning tokens to output
+                # If reasoning_in_output is True, reasoning tokens are already in output, so don't add
+                if reasoning_in_output == False:
+                    add_reasoning_to_output = True
+
+        except (ValueError, TypeError) as e:
+            if "reasoning_in_output" in str(e):
+                raise  # Re-raise validation errors
+            reasoning_tokens_value = 0.0
+
+    # Handle cache tokens (default to 0 if not provided)
+    cache_read_value = 0.0
+    cache_write_value = 0.0
+    cache_read_price_value = 0.0
+    cache_write_price_value = 0.0
+
+    # Check if we have cache tokens and prices
+    has_cache = (
         cache_read_tokens is not None
         and cache_write_tokens is not None
         and cache_read_price is not None
@@ -74,19 +172,50 @@ def calculate_benchmark_cost(
         and not pd.isna(cache_write_tokens)
         and not pd.isna(cache_read_price)
         and not pd.isna(cache_write_price)
-    ):
-        try:
-            cache_read_tokens = float(cache_read_tokens)
-            cache_write_tokens = float(cache_write_tokens)
-            cache_read_price = float(cache_read_price)
-            cache_write_price = float(cache_write_price)
+    )
 
-            cache_read_cost = (cache_read_tokens * cache_read_price) / 1_000_000
-            cache_write_cost = (cache_write_tokens * cache_write_price) / 1_000_000
-            total_cost += cache_read_cost + cache_write_cost
+    if has_cache:
+        try:
+            cache_read_value = float(cache_read_tokens)
+            cache_write_value = float(cache_write_tokens)
+            cache_read_price_value = float(cache_read_price)
+            cache_write_price_value = float(cache_write_price)
         except (ValueError, TypeError):
-            # If cache conversion fails, continue without cache costs
+            # If cache conversion fails, treat as no cache (values stay at 0)
             pass
+
+    # Calculate cost using the formula:
+    # Base: input_tokens * input_price + output_tokens * output_price +
+    #       cache_read * cache_read_price + cache_write * cache_write_price
+    #
+    # With adjustments:
+    # - If cache_in_input=True: (input_tokens - cache_read) * input_price + cache_read * cache_read_price
+    # - If cache_in_output=True: (output_tokens - cache_write) * output_price + cache_write * cache_write_price
+
+    # Determine input tokens to charge at input_price
+    input_tokens_for_price = input_tokens
+    if cache_in_input == True and cache_read_value > 0:
+        # Cache tokens are included in input_tokens, so subtract them
+        input_tokens_for_price = input_tokens - cache_read_value
+
+    input_cost = (input_tokens_for_price * input_price) / 1_000_000
+
+    # Determine output tokens to charge at output_price
+    # Only add reasoning tokens to output if they're not already included
+    reasoning_adjustment = reasoning_tokens_value if add_reasoning_to_output else 0.0
+    output_tokens_for_price = output_tokens + reasoning_adjustment
+
+    if cache_in_output == True and cache_write_value > 0:
+        # Cache tokens are included in output_tokens, so subtract them
+        output_tokens_for_price = output_tokens_for_price - cache_write_value
+
+    output_cost = (output_tokens_for_price * output_price) / 1_000_000
+
+    # Always charge cache tokens at cache prices
+    cache_read_cost = (cache_read_value * cache_read_price_value) / 1_000_000
+    cache_write_cost = (cache_write_value * cache_write_price_value) / 1_000_000
+
+    total_cost = input_cost + output_cost + cache_read_cost + cache_write_cost
 
     return total_cost
 
@@ -111,16 +240,21 @@ def process_price_history(
     df,
     input_token_col=None,
     output_token_col=None,
+    reasoning_token_col=None,
+    reasoning_in_output_col=None,
     cache_read_token_col=None,
     cache_write_token_col=None,
     cache_read_price_col=None,
     cache_write_price_col=None,
+    cache_in_input_col=None,
+    cache_in_output_col=None,
     epoch_column=None,
     verbose=False,
 ):
     """
     Process the dataframe to create new rows for each price reduction.
     Adds a blended price column (3:1 input:output).
+    Optionally includes reasoning tokens (conditionally added to output tokens in cost calculation).
     Optionally includes cache token costs if cache columns are provided.
     Optionally normalizes benchmark costs to 16 epochs using epoch_column.
 
@@ -128,9 +262,18 @@ def process_price_history(
     it will track price reductions based on blended price only.
 
     Args:
+        reasoning_token_col: Optional column name containing reasoning tokens.
+                            Defaults to 0 if not provided.
+        reasoning_in_output_col: Optional column name indicating if reasoning tokens are already included
+                                in output tokens (True) or need to be added (False).
+                                Required if reasoning_token_col is specified and has non-zero values.
+        cache_in_input_col: Optional column name indicating if cache_read tokens are already included
+                           in input_tokens (True) or are separate (False).
+        cache_in_output_col: Optional column name indicating if cache_write tokens are already included
+                            in output_tokens (True) or are separate (False).
         epoch_column: Optional column name containing the number of epochs.
-                     All costs will be normalized to 16 epochs using the formula:
-                     normalized_cost = cost * (16 / epochs)
+                     All costs will be normalized to 1 epoch using the formula:
+                     normalized_cost = cost * (1 / epochs)
     """
 
     # Check if token columns are provided
@@ -164,7 +307,7 @@ def process_price_history(
         else:
             use_epoch_normalization = True
             print(f"Using epoch normalization with column: {epoch_column}")
-            print("All benchmark costs will be normalized to 16 epochs.")
+            print("All benchmark costs will be normalized to 1 epoch.")
 
     # Check cache configuration
     use_cache = all(
@@ -261,6 +404,18 @@ def process_price_history(
             if pd.isna(input_tokens) or pd.isna(output_tokens):
                 continue
 
+            # Get reasoning tokens (defaults to 0 if not provided)
+            reasoning_tokens = (
+                row.get(reasoning_token_col, np.nan) if reasoning_token_col else None
+            )
+
+            # Get reasoning_in_output flag
+            reasoning_in_output = (
+                row.get(reasoning_in_output_col, np.nan)
+                if reasoning_in_output_col
+                else None
+            )
+
             # Get cache token data if using cache
             cache_read_tokens = (
                 row.get(cache_read_token_col, np.nan) if use_cache else None
@@ -274,10 +429,21 @@ def process_price_history(
             cache_write_price = (
                 row.get(cache_write_price_col, np.nan) if use_cache else None
             )
+
+            # Get cache_in_input and cache_in_output flags
+            cache_in_input = (
+                row.get(cache_in_input_col, np.nan) if cache_in_input_col else None
+            )
+            cache_in_output = (
+                row.get(cache_in_output_col, np.nan) if cache_in_output_col else None
+            )
         else:
             input_tokens = output_tokens = np.nan
+            reasoning_tokens = None
+            reasoning_in_output = None
             cache_read_tokens = cache_write_tokens = None
             cache_read_price = cache_write_price = None
+            cache_in_input = cache_in_output = None
 
         # Get epoch data if using epoch normalization
         epochs = None
@@ -293,7 +459,7 @@ def process_price_history(
 
             try:
                 epochs = float(epochs)
-                epoch_normalization_factor = 16.0 / epochs
+                epoch_normalization_factor = 1.0 / epochs
                 if verbose:
                     print(
                         f"  {model_name}: Using {epochs} epochs, normalization factor: {epoch_normalization_factor:.4f}"
@@ -386,16 +552,26 @@ def process_price_history(
 
             # Calculate comparison metric (benchmark cost if available, otherwise blended price)
             if use_token_cost:
-                current_metric = calculate_benchmark_cost(
-                    input_tokens,
-                    output_tokens,
-                    input_price,
-                    output_price,
-                    cache_read_tokens,
-                    cache_write_tokens,
-                    cache_read_price,
-                    cache_write_price,
-                )
+                try:
+                    current_metric = calculate_benchmark_cost(
+                        input_tokens,
+                        output_tokens,
+                        input_price,
+                        output_price,
+                        reasoning_tokens,
+                        reasoning_in_output,
+                        cache_read_tokens,
+                        cache_write_tokens,
+                        cache_read_price,
+                        cache_write_price,
+                        cache_in_input,
+                        cache_in_output,
+                    )
+                except ValueError as e:
+                    # Raise error if there's a mismatch in token/price availability
+                    raise ValueError(
+                        f"Error processing model '{model_name}' at date {date_str}: {str(e)}"
+                    )
                 # Apply epoch normalization if enabled
                 if use_epoch_normalization and not pd.isna(current_metric):
                     current_metric = current_metric * epoch_normalization_factor
@@ -485,6 +661,17 @@ def process_price_history(
                 # Remove all historical price columns (the time series ones)
                 price_cols_to_remove.extend(price_columns)
 
+                # Don't remove cache-related columns (we want to keep them for viewing)
+                cache_cols = [
+                    col
+                    for col in price_cols_to_remove
+                    if "cache" in col.lower()
+                    and ("read" in col.lower() or "write" in col.lower())
+                ]
+                for cache_col in cache_cols:
+                    if cache_col in price_cols_to_remove:
+                        price_cols_to_remove.remove(cache_col)
+
                 for col in price_cols_to_remove:
                     if col in new_row:
                         new_row[col] = np.nan
@@ -538,6 +725,17 @@ def process_price_history(
             if "price" in col.lower() or "cost" in col.lower()
         ]
 
+        # Keep cache-related columns (for viewing)
+        cache_cols_to_keep = [
+            col
+            for col in all_price_cols
+            if "cache" in col.lower()
+            and ("read" in col.lower() or "write" in col.lower())
+        ]
+
+        # Add cache columns to the keep list
+        keep_price_cols.extend(cache_cols_to_keep)
+
         # Drop price columns that are NOT in our keep list
         cols_to_drop = [col for col in all_price_cols if col not in keep_price_cols]
 
@@ -552,6 +750,7 @@ def process_price_history(
         return result_df
     else:
         # If no new rows, return an empty DataFrame with the expected columns
+        # Note: Cache columns will be added if they exist in the data
         return pd.DataFrame(
             columns=[
                 "Model",
@@ -564,112 +763,77 @@ def process_price_history(
         )
 
 
-def main():
-    """Main function to process the CSV file"""
+def process_configuration(config, df, verbose=False):
+    """
+    Process a single configuration and generate the output CSV.
 
-    # GPQA-Diamond Configuration
-    # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "data/price_reduction_models.csv"
+    Args:
+        config: Dictionary containing configuration parameters
+        df: DataFrame with the input data
+        verbose: Whether to show detailed processing information
 
-    # # Benchmark token columns (set to None to use only blended price tracking)
-    # INPUT_TOKEN_COL = "input_tokens_epoch_gpqa"
-    # OUTPUT_TOKEN_COL = "output_tokens_epoch_gpqa"
+    Returns:
+        True if successful, False otherwise
+    """
+    config_name = config["name"]
+    input_file = config["input_file"]
+    output_file = config["output_file"]
+    input_token_col = config["input_token_col"]
+    output_token_col = config["output_token_col"]
+    reasoning_token_col = config.get("reasoning_token_col")
+    reasoning_in_output_col = config.get("reasoning_in_output_col")
+    cache_read_token_col = config.get("cache_read_token_col")
+    cache_write_token_col = config.get("cache_write_token_col")
+    cache_read_price_col = config.get("cache_read_price_col")
+    cache_write_price_col = config.get("cache_write_price_col")
+    cache_in_input_col = config.get("cache_in_input_col")
+    cache_in_output_col = config.get("cache_in_output_col")
+    epoch_column = config.get("epoch_column")
 
-    # # Cache token columns (set to None to disable cache calculation)
-    # CACHE_READ_TOKEN_COL = None  # e.g., "cache_read_tokens_epoch_gpqa"
-    # CACHE_WRITE_TOKEN_COL = None  # e.g., "cache_write_tokens_epoch_gpqa"
-    # CACHE_READ_PRICE_COL = None  # e.g., "Cache Read Price USD/1M Tokens"
-    # CACHE_WRITE_PRICE_COL = None  # e.g., "Cache Write Price USD/1M Tokens"
-
-    # # Epoch column (set to None to disable epoch normalization)
-    # EPOCH_COLUMN = "gpqa_epochs"  # e.g., "epochs_gpqa"
-
-    # Column Specfication for SWE
-    # # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "data/swe_price_reduction_models.csv"
-    # INPUT_TOKEN_COL = "input tokens swe"
-    # OUTPUT_TOKEN_COL = "output tokens swe"
-    # CACHE_READ_TOKEN_COL = "cache reads swe"
-    # CACHE_WRITE_TOKEN_COL = "cache write swe"
-    # CACHE_READ_PRICE_COL = "cache read cost "
-    # CACHE_WRITE_PRICE_COL = "cache write cost"
-    # EPOCH_COLUMN = (
-    #     None  # e.g., "epochs_swe" - set to None to disable epoch normalization
-    # )
-
-    # Columns Specific to Frontier Math
-    # ================================================
-    # INPUT_FILE = "inference_data_new_large.csv"
-    # OUTPUT_FILE = "data/frontier_math_price_reduction_models.csv"
-    # INPUT_TOKEN_COL = "input tokens frontier"
-    # OUTPUT_TOKEN_COL = "output tokens frontier"
-    # CACHE_READ_TOKEN_COL = "cache read tokens frontier"
-    # CACHE_WRITE_TOKEN_COL = "cache write tokens frontier"
-    # CACHE_READ_PRICE_COL = "cache read cost "
-    # CACHE_WRITE_PRICE_COL = "cache write cost"
-    # EPOCH_COLUMN = None  # e.g., "epochs_frontier" - set to None to disable epoch normalization
-
-    # Cache token columns (set to None to disable cache calculation)
-
-    # Columns specifc to AIME
-    # ================================================
-    INPUT_FILE = "inference_data_new_large.csv"
-    OUTPUT_FILE = "data/aime_price_reduction_models.csv"
-    INPUT_TOKEN_COL = "input tokens AIME"
-    OUTPUT_TOKEN_COL = "output tokens AIME"
-    # cache tokens are nto used for AIME
-    CACHE_READ_TOKEN_COL = "cache read tokens aiml"
-    CACHE_WRITE_TOKEN_COL = "cache write tokens aiml"
-    CACHE_READ_PRICE_COL = "cache read cost aiml"
-    CACHE_WRITE_PRICE_COL = "cache write cost aiml"
-    EPOCH_COLUMN = "AIME_epochs"  # e.g., "epochs_aime" - set to None to disable epoch normalization
-
-    # Set to True to see detailed processing information
-    VERBOSE = True
-
+    print("\n" + "=" * 60)
+    print(f"Processing {config_name}")
     print("=" * 60)
-    print("Model Price Reduction History Generator (BLENDED PRICE)")
-    print("=" * 60)
-    print(f"Input file: {INPUT_FILE}")
-    print(f"Output file: {OUTPUT_FILE}")
+    print(f"Input file: {input_file}")
+    print(f"Output file: {output_file}")
 
-    if INPUT_TOKEN_COL and OUTPUT_TOKEN_COL:
-        print(f"Benchmark: {INPUT_TOKEN_COL} + {OUTPUT_TOKEN_COL}")
+    if input_token_col and output_token_col:
+        print(f"Benchmark: {input_token_col} + {output_token_col}")
     else:
         print("Benchmark: Blended price tracking only (no token columns specified)")
     print("=" * 60)
 
     try:
-        # Read the CSV file
-        df = pd.read_csv(INPUT_FILE)
-        print(f"Loaded {len(df)} rows")
-
         # Check if required columns exist (only if they're specified)
-        if INPUT_TOKEN_COL and INPUT_TOKEN_COL not in df.columns:
-            print(f"Warning: Input token column '{INPUT_TOKEN_COL}' not found in data")
-            INPUT_TOKEN_COL = None
+        input_token_col_actual = input_token_col
+        output_token_col_actual = output_token_col
 
-        if OUTPUT_TOKEN_COL and OUTPUT_TOKEN_COL not in df.columns:
+        if input_token_col and input_token_col not in df.columns:
+            print(f"Warning: Input token column '{input_token_col}' not found in data")
+            input_token_col_actual = None
+
+        if output_token_col and output_token_col not in df.columns:
             print(
-                f"Warning: Output token column '{OUTPUT_TOKEN_COL}' not found in data"
+                f"Warning: Output token column '{output_token_col}' not found in data"
             )
-            OUTPUT_TOKEN_COL = None
+            output_token_col_actual = None
 
         print(f"Processing price history...")
 
         # Process the data
         result_df = process_price_history(
             df,
-            INPUT_TOKEN_COL,
-            OUTPUT_TOKEN_COL,
-            CACHE_READ_TOKEN_COL,
-            CACHE_WRITE_TOKEN_COL,
-            CACHE_READ_PRICE_COL,
-            CACHE_WRITE_PRICE_COL,
-            EPOCH_COLUMN,
-            verbose=VERBOSE,
+            input_token_col_actual,
+            output_token_col_actual,
+            reasoning_token_col,
+            reasoning_in_output_col,
+            cache_read_token_col,
+            cache_write_token_col,
+            cache_read_price_col,
+            cache_write_price_col,
+            cache_in_input_col,
+            cache_in_output_col,
+            epoch_column,
+            verbose=verbose,
         )
 
         print(f"Generated {len(result_df)} rows with price reductions")
@@ -687,14 +851,14 @@ def main():
             )
 
             # Ensure data directory exists
-            output_dir = os.path.dirname(OUTPUT_FILE)
+            output_dir = os.path.dirname(output_file)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir, exist_ok=True)
                 print(f"Created directory: {output_dir}")
 
             # Save the result
-            result_df.to_csv(OUTPUT_FILE, index=False)
-            print(f"Saved results to {OUTPUT_FILE}")
+            result_df.to_csv(output_file, index=False)
+            print(f"Saved results to {output_file}")
 
             # Check for duplicates in result
             print("\nChecking for duplicate price combinations:")
@@ -731,18 +895,113 @@ def main():
                 print("  ✓ No duplicate price combinations found!")
 
             print(
-                f"\nProcessing complete! Generated {len(result_df)} unique model entries."
+                f"\n{config_name} processing complete! Generated {len(result_df)} unique model entries."
             )
+            return True
         else:
-            print("No price reductions found in the data")
+            print(f"No price reductions found in the data for {config_name}")
+            return False
 
-    except FileNotFoundError:
-        print(f"Error: Could not find file {INPUT_FILE}")
     except Exception as e:
-        print(f"Error processing data: {str(e)}")
+        print(f"Error processing {config_name}: {str(e)}")
         import traceback
 
         traceback.print_exc()
+        return False
+
+
+def main():
+    """Main function to process all configurations"""
+
+    # Define all configurations
+    configurations = [
+        {
+            "name": "GPQA-Diamond",
+            "input_file": "data/inference_data_new_large.csv",
+            "output_file": "data/test_price_reduction_models.csv",
+            "input_token_col": "input_tokens_epoch_gpqa",
+            "output_token_col": "output_tokens_epoch_gpqa",
+            "reasoning_token_col": None,
+            "reasoning_in_output_col": "gqpa_reasoning_in_output",
+            "cache_read_token_col": None,
+            "cache_write_token_col": None,
+            "cache_read_price_col": None,
+            "cache_write_price_col": None,
+            "cache_in_input_col": None,
+            "cache_in_output_col": None,
+            "epoch_column": "gpqa_epochs",
+        },
+        {
+            "name": "SWE-Bench",
+            "input_file": "data/inference_data_new_large.csv",
+            "output_file": "data/swe_price_reduction_models.csv",
+            "input_token_col": "input tokens swe",
+            "output_token_col": "output tokens swe",
+            "reasoning_token_col": None,
+            "reasoning_in_output_col": None,
+            "cache_read_token_col": "cache reads swe",
+            "cache_write_token_col": "cache write swe",
+            "cache_read_price_col": "cache_read_cost",
+            "cache_write_price_col": "cache_write_cost",
+            "cache_in_input_col": "cache_in_input",
+            "cache_in_output_col": "cache_in_output",
+            "epoch_column": None,
+        },
+        {
+            "name": "AIME",
+            "input_file": "data/inference_data_new_large.csv",
+            "output_file": "data/aime_price_reduction_models.csv",
+            "input_token_col": "input tokens AIME",
+            "output_token_col": "output tokens AIME",
+            "reasoning_token_col": "AIME_reasoning",
+            "reasoning_in_output_col": "reasoning_in_output",
+            "cache_read_token_col": "cache read tokens aiml",
+            "cache_write_token_col": "cache write tokens aiml",
+            "cache_read_price_col": "cache read cost aiml",
+            "cache_write_price_col": "cache write cost aiml",
+            "cache_in_input_col": None,
+            "cache_in_output_col": None,
+            "epoch_column": "AIME_epochs",
+        },
+    ]
+
+    # Set to True to see detailed processing information
+    VERBOSE = True
+
+    print("=" * 60)
+    print("Model Price Reduction History Generator (BLENDED PRICE)")
+    print("Processing all configurations: GPQA, SWE-Bench, and AIME")
+    print("=" * 60)
+
+    # Read the input CSV file once (all configurations use the same input file)
+    input_file = configurations[0]["input_file"]
+    try:
+        df = pd.read_csv(input_file)
+        print(f"\nLoaded {len(df)} rows from {input_file}")
+    except FileNotFoundError:
+        print(f"Error: Could not find file {input_file}")
+        return
+    except Exception as e:
+        print(f"Error reading input file: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
+        return
+
+    # Process each configuration
+    results = []
+    for config in configurations:
+        success = process_configuration(config, df, verbose=VERBOSE)
+        results.append((config["name"], success))
+
+    # Print summary
+    print("\n" + "=" * 60)
+    print("SUMMARY")
+    print("=" * 60)
+    for name, success in results:
+        status = "✓ SUCCESS" if success else "✗ FAILED"
+        print(f"{name}: {status}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
