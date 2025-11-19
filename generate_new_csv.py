@@ -451,7 +451,14 @@ def process_price_history(
         if use_epoch_normalization:
             epochs = row.get(epoch_column, np.nan)
             if pd.isna(epochs) or epochs <= 0:
-                if verbose:
+                # If we're computing benchmark costs, this is an error - costs won't be normalized correctly
+                if use_token_cost:
+                    print(
+                        f"ERROR: Model '{model_name}': "
+                        f"Epoch normalization is enabled but epoch data is missing or invalid ('{epoch_column}'={epochs}). "
+                        f"Cannot compute correctly normalized benchmark cost. Skipping this model."
+                    )
+                elif verbose:
                     print(
                         f"  {model_name}: Missing or invalid epoch data, skipping row"
                     )
@@ -465,71 +472,18 @@ def process_price_history(
                         f"  {model_name}: Using {epochs} epochs, normalization factor: {epoch_normalization_factor:.4f}"
                     )
             except (ValueError, TypeError):
-                if verbose:
+                # If we're computing benchmark costs, this is an error
+                if use_token_cost:
+                    print(
+                        f"ERROR: Model '{model_name}': "
+                        f"Epoch normalization is enabled but epoch value is invalid ('{epoch_column}'='{epochs}'). "
+                        f"Cannot compute correctly normalized benchmark cost. Skipping this model."
+                    )
+                elif verbose:
                     print(
                         f"  {model_name}: Invalid epoch value '{epochs}', skipping row"
                     )
                 continue  # Skip this row if epoch value cannot be converted
-
-        # --- BEGIN: Warn if tokens specified but price missing (per model/row) ---
-        # For each date, check if tokens are specified but price is missing for input/output/cache
-        for date_str in sorted_dates:
-            input_price_col = complete_pairs[date_str]["input"]
-            output_price_col = complete_pairs[date_str]["output"]
-
-            input_price = row.get(input_price_col, np.nan)
-            output_price = row.get(output_price_col, np.nan)
-
-            # Input tokens & price
-            if (
-                input_token_col
-                and input_token_col in row
-                and not pd.isna(row[input_token_col])
-            ):
-                if pd.isna(input_price):
-                    print(
-                        f"WARNING: Model '{model_name}' specifies input tokens ({input_token_col}={row[input_token_col]}) but is missing input price for {date_str} ({input_price_col})"
-                    )
-
-            # Output tokens & price
-            if (
-                output_token_col
-                and output_token_col in row
-                and not pd.isna(row[output_token_col])
-            ):
-                if pd.isna(output_price):
-                    print(
-                        f"WARNING: Model '{model_name}' specifies output tokens ({output_token_col}={row[output_token_col]}) but is missing output price for {date_str} ({output_price_col})"
-                    )
-
-            # Cache read tokens & price
-            if (
-                cache_read_token_col
-                and cache_read_token_col in row
-                and not pd.isna(row[cache_read_token_col])
-            ):
-                if cache_read_price_col and (
-                    cache_read_price_col not in row
-                    or pd.isna(row.get(cache_read_price_col, np.nan))
-                ):
-                    print(
-                        f"WARNING: Model '{model_name}' specifies cache read tokens ({cache_read_token_col}={row[cache_read_token_col]}) but is missing cache read price ({cache_read_price_col}) for {date_str}"
-                    )
-
-            # Cache write tokens & price
-            if (
-                cache_write_token_col
-                and cache_write_token_col in row
-                and not pd.isna(row[cache_write_token_col])
-            ):
-                if cache_write_price_col and (
-                    cache_write_price_col not in row
-                    or pd.isna(row.get(cache_write_price_col, np.nan))
-                ):
-                    print(
-                        f"WARNING: Model '{model_name}' specifies cache write tokens ({cache_write_token_col}={row[cache_write_token_col]}) but is missing cache write price ({cache_write_price_col}) for {date_str}"
-                    )
-        # --- END: Warn if tokens specified but price missing ---
 
         # Initialize price history for this model
         if model_name not in model_price_history:
@@ -541,6 +495,21 @@ def process_price_history(
 
             input_price = row.get(input_price_col, np.nan)
             output_price = row.get(output_price_col, np.nan)
+
+            # Check for partial price data (one price present but not the other)
+            has_input_price = not pd.isna(input_price)
+            has_output_price = not pd.isna(output_price)
+
+            if has_input_price != has_output_price:
+                # Partial price data - this is an error if we're trying to compute benchmark cost
+                if use_token_cost:
+                    print(
+                        f"ERROR: Model '{model_name}' at {date_str}: "
+                        f"Partial price data - input_price={'present' if has_input_price else 'missing'}, "
+                        f"output_price={'present' if has_output_price else 'missing'}. "
+                        f"Both prices required to compute benchmark cost."
+                    )
+                continue
 
             # Skip if prices are not available
             if pd.isna(input_price) or pd.isna(output_price):
@@ -608,6 +577,79 @@ def process_price_history(
                             f"  {model_name} - {date_str}: Skipping duplicate price combination ${input_price}/${output_price} (already exists for this model)"
                         )
                     continue
+
+                # --- VALIDATION: Check for missing data that would make benchmark cost incorrect ---
+                # Only validate when we're actually computing a benchmark cost for a price reduction
+                if use_token_cost:
+                    # Check reasoning tokens configuration
+                    if reasoning_tokens is not None and not pd.isna(reasoning_tokens):
+                        reasoning_val = float(reasoning_tokens)
+                        if reasoning_val > 0:
+                            if reasoning_in_output is None or pd.isna(
+                                reasoning_in_output
+                            ):
+                                print(
+                                    f"ERROR: Model '{model_name}' at {date_str}: "
+                                    f"Reasoning tokens specified ({reasoning_token_col}={reasoning_val}) "
+                                    f"but reasoning_in_output flag is missing. "
+                                    f"Must specify True/False in '{reasoning_in_output_col}' to compute correct benchmark cost."
+                                )
+                                continue  # Skip this entry - can't compute correct cost
+
+                    # Check cache tokens configuration
+                    has_cache_read = cache_read_tokens is not None and not pd.isna(
+                        cache_read_tokens
+                    )
+                    has_cache_write = cache_write_tokens is not None and not pd.isna(
+                        cache_write_tokens
+                    )
+
+                    if has_cache_read:
+                        cache_read_val = float(cache_read_tokens)
+                        if cache_read_val > 0:
+                            # Check if cache read price is available
+                            if cache_read_price is None or pd.isna(cache_read_price):
+                                print(
+                                    f"ERROR: Model '{model_name}' at {date_str}: "
+                                    f"Cache read tokens specified ({cache_read_token_col}={cache_read_val}) "
+                                    f"but cache read price is missing ({cache_read_price_col}). "
+                                    f"Cannot compute correct benchmark cost."
+                                )
+                                continue  # Skip this entry
+
+                            # Check if cache_in_input flag is specified
+                            if cache_in_input is None or pd.isna(cache_in_input):
+                                print(
+                                    f"ERROR: Model '{model_name}' at {date_str}: "
+                                    f"Cache read tokens specified ({cache_read_token_col}={cache_read_val}) "
+                                    f"but cache_in_input flag is missing. "
+                                    f"Must specify True/False in '{cache_in_input_col}' to compute correct benchmark cost."
+                                )
+                                continue  # Skip this entry
+
+                    if has_cache_write:
+                        cache_write_val = float(cache_write_tokens)
+                        if cache_write_val > 0:
+                            # Check if cache write price is available
+                            if cache_write_price is None or pd.isna(cache_write_price):
+                                print(
+                                    f"ERROR: Model '{model_name}' at {date_str}: "
+                                    f"Cache write tokens specified ({cache_write_token_col}={cache_write_val}) "
+                                    f"but cache write price is missing ({cache_write_price_col}). "
+                                    f"Cannot compute correct benchmark cost."
+                                )
+                                continue  # Skip this entry
+
+                            # Check if cache_in_output flag is specified
+                            if cache_in_output is None or pd.isna(cache_in_output):
+                                print(
+                                    f"ERROR: Model '{model_name}' at {date_str}: "
+                                    f"Cache write tokens specified ({cache_write_token_col}={cache_write_val}) "
+                                    f"but cache_in_output flag is missing. "
+                                    f"Must specify True/False in '{cache_in_output_col}' to compute correct benchmark cost."
+                                )
+                                continue  # Skip this entry
+                # --- END VALIDATION ---
 
                 if verbose:
                     print(
@@ -921,8 +963,8 @@ def main():
             "output_file": "data/price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
-            "reasoning_token_col": None,
-            "reasoning_in_output_col": "gqpa_reasoning_in_output",
+            "reasoning_token_col": "gpqa_reasoning_tokens",
+            "reasoning_in_output_col": "gpqa_reasoning_in_output",
             "cache_read_token_col": None,
             "cache_write_token_col": None,
             "cache_read_price_col": None,

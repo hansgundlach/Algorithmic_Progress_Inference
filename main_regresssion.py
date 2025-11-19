@@ -843,7 +843,7 @@ print("COMPREHENSIVE COMPARISON TABLE")
 print("=" * 80 + "\n")
 # Set hardware_gain_factor to adjust for hardware improvements (default is 1.0, no adjustment)
 # For example, hardware_gain_factor=2.0 would divide all year decrease factors by 2
-comparison_table = create_comparison_table(hardware_gain_factor=1.0)
+comparison_table = create_comparison_table(hardware_gain_factor=(1/0.7))
 print("\n")
 print(comparison_table.to_string(index=False))
 print("\n")
