@@ -62,6 +62,10 @@ def plot_benchmark_price_vs_time(
     figsize=(14, 8),
     benchmark_label="GPQA-Diamond",  # <-- New argument for label customization
     save_path=None,  # <-- Path to save the figure (e.g., "figures/swe_total_bench.png")
+    min_x_date=None,  # <-- Minimum date for x-axis display (for consistent axis across graphs)
+    max_x_date=None,  # <-- Maximum date for x-axis display (for consistent axis across graphs)
+    min_y_price=None,  # <-- Minimum price for y-axis display (for consistent axis across graphs)
+    max_y_price=None,  # <-- Maximum price for y-axis display (for consistent axis across graphs)
 ):
     """
     Graph total price for any benchmark vs release date with overall fit capability.
@@ -86,6 +90,10 @@ def plot_benchmark_price_vs_time(
     - figsize: Figure size tuple
     - benchmark_label: Custom label for the benchmark (e.g., "GPQA-Diamond", "Swe-Bench V")
     - save_path: Optional path to save the figure (e.g., "figures/swe_total_bench.png"). If None, figure is only displayed.
+    - min_x_date: Minimum date for x-axis display (datetime or string). Use to align x-axis across multiple graphs.
+    - max_x_date: Maximum date for x-axis display (datetime or string). Use to align x-axis across multiple graphs.
+    - min_y_price: Minimum price for y-axis display (float). Use to align y-axis across multiple graphs.
+    - max_y_price: Maximum price for y-axis display (float). Use to align y-axis across multiple graphs.
 
     Returns:
     - model: Fitted regression model (record trend if record_price_trend=True, else overall trend)
@@ -639,6 +647,23 @@ def plot_benchmark_price_vs_time(
     # Y-axis settings
     plt.yscale("log")
 
+    # Custom y-axis formatter to display dollar amounts instead of scientific notation
+    from matplotlib.ticker import FuncFormatter
+
+    def dollar_formatter(x, pos):
+        """Format y-axis values as dollar amounts"""
+        if x >= 1:
+            return f"${x:.0f}"
+        elif x >= 0.01:
+            return f"${x:.2f}"
+        elif x >= 0.001:
+            return f"${x:.3f}"
+        else:
+            return f"${x:.4f}"
+
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(FuncFormatter(dollar_formatter))
+
     # Axis labels - CUSTOMIZABLE SECTION
     xlabel_text = default_xlabel_text  # CUSTOMIZABLE - Change this line to set custom x-axis label
     xlabel_text = "Date"
@@ -647,11 +672,15 @@ def plot_benchmark_price_vs_time(
 
     ylabel_text = default_ylabel_text  # CUSTOMIZABLE - Change this line to set custom y-axis label
     ylabel_text = f"Benchmark Price ({benchmark_label})"
-    ylabel_fontsize = 26  # Increased from 20
+    # Debug: print the label to verify it's correct
+    print(f"DEBUG: ylabel_text = '{ylabel_text}'")
+    ylabel_fontsize = 25  # Increased from 20
     ylabel_fontweight = "bold"
 
     plt.xlabel(xlabel_text, fontsize=xlabel_fontsize, fontweight=xlabel_fontweight)
-    plt.ylabel(ylabel_text, fontsize=ylabel_fontsize, fontweight=ylabel_fontweight)
+    ax.set_ylabel(
+        ylabel_text, fontsize=ylabel_fontsize, fontweight=ylabel_fontweight, labelpad=10
+    )
 
     # Title settings - CUSTOMIZABLE SECTION
     title_text = (
@@ -673,9 +702,9 @@ def plot_benchmark_price_vs_time(
     # Set x-axis ticks to show every 4 months
     from matplotlib.dates import MonthLocator, DateFormatter
 
-    ax = plt.gca()
+    # Get current axes (already created above for y-axis formatting)
     ax.xaxis.set_major_locator(MonthLocator(interval=4))
-    ax.xaxis.set_major_formatter(DateFormatter("%Y-%m"))
+    ax.xaxis.set_major_formatter(DateFormatter("%b %Y"))
 
     plt.tick_params(axis="x", labelsize=tick_fontsize, rotation=45)
     plt.tick_params(axis="y", labelsize=tick_fontsize)
@@ -714,7 +743,45 @@ def plot_benchmark_price_vs_time(
             fontsize=legend_fontsize, loc=legend_location, framealpha=legend_framealpha
         )
 
-    # Layout
+    # Set x-axis limits if specified (for consistent axis across multiple graphs)
+    if min_x_date is not None or max_x_date is not None:
+        current_xlim = ax.get_xlim()
+
+        # Convert date strings to datetime if needed
+        if min_x_date is not None:
+            if isinstance(min_x_date, str):
+                min_x_date = pd.to_datetime(min_x_date)
+            x_min = min_x_date
+        else:
+            x_min = current_xlim[0]
+
+        if max_x_date is not None:
+            if isinstance(max_x_date, str):
+                max_x_date = pd.to_datetime(max_x_date)
+            x_max = max_x_date
+        else:
+            x_max = current_xlim[1]
+
+        ax.set_xlim(x_min, x_max)
+
+    # Set y-axis limits if specified (for consistent axis across multiple graphs)
+    if min_y_price is not None or max_y_price is not None:
+        current_ylim = ax.get_ylim()
+
+        if min_y_price is not None:
+            y_min = min_y_price
+        else:
+            y_min = current_ylim[0]
+
+        if max_y_price is not None:
+            y_max = max_y_price
+        else:
+            y_max = current_ylim[1]
+
+        ax.set_ylim(y_min, y_max)
+
+    # Layout - adjust subplot to ensure ylabel has enough space
+    plt.subplots_adjust(left=0.12)  # Add extra left padding for ylabel
     plt.tight_layout()
     ####################################################################################
     # END GRAPH APPEARANCE SETTINGS
@@ -809,8 +876,11 @@ plot_benchmark_price_vs_time(
     use_quantile_regression=False,
     quantile=0.9,
     record_price_trend=False,
-    benchmark_label="Swe-Bench V",  # <-- Example: change label here
+    benchmark_label="SWE-bench V",  # <-- Example: change label here
     save_path="figures/swe_total_bench.png",  # <-- Example: save figure to file
+    min_x_date="2024-03-01",  # <-- Set x-axis start date
+    max_x_date="2025-11-01",  # <-- Set x-axis end date
+    min_y_price=.001,
 )
 # %%
 
@@ -829,6 +899,9 @@ plot_benchmark_price_vs_time(
     record_price_trend=False,
     benchmark_label="GPQA-Diamond",  # <-- Example: change label here
     save_path="figures/gpqa_total_bench.png",  # <-- Example: save figure to file
+    min_x_date="2024-03-01",  # <-- Set x-axis start date (same as SWE for consistency)
+    max_x_date="2025-11-01",  # <-- Set x-axis end date (same as SWE for consistency)
+    max_y_price=1000,
 )
 
 # %%
