@@ -959,7 +959,7 @@ def main():
     configurations = [
         {
             "name": "GPQA-Diamond",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": "data/merged_with_training_compute.csv",
             "output_file": "data/price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
@@ -975,7 +975,7 @@ def main():
         },
         {
             "name": "SWE-Bench",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": "data/merged_with_training_compute.csv",
             "output_file": "data/swe_price_reduction_models.csv",
             "input_token_col": "input tokens swe",
             "output_token_col": "output tokens swe",
@@ -991,7 +991,7 @@ def main():
         },
         {
             "name": "AIME",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": "data/merged_with_training_compute.csv",
             "output_file": "data/aime_price_reduction_models.csv",
             "input_token_col": "input tokens AIME",
             "output_token_col": "output tokens AIME",
