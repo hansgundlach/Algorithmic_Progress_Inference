@@ -160,73 +160,117 @@ def main():
     # Store line data for inline labels
     line_data = []
 
-    # First, compute all budget-constrained data
+    # Compute all data first
     budget_data = {}
     for B in budgets:
         budget_data[B] = best_under_budget(df, B)
-
-    # Plot each budget constraint with categorical colors (solid lines)
-    for i, B in enumerate(budgets):
-        sub = budget_data[B]
-        if len(sub) == 0:
-            continue
-
-        trans = get_transitions(sub)
-        color = EPOCH_COLORS[i % len(EPOCH_COLORS)]
-
-        ax.step(
-            sub["Date"],
-            sub["Score_logit"],
-            where="post",
-            linewidth=3.5,
-            color=color,
-            zorder=5 + i,
-        )
-        ax.scatter(
-            trans["Date"],
-            trans["Score_logit"],
-            s=70,
-            color=color,
-            zorder=6 + i,
-            edgecolors="white",
-            linewidths=2,
-        )
-
-        label = f"${B:g}" if B >= 1 else f"${B:.2f}"
-        line_data.append(
-            {
-                "label": label,
-                "color": color,
-                "end_date": sub["Date"].iloc[-1],
-                "end_score": sub["Score_logit"].iloc[-1],
-            }
-        )
-
-    # Plot unconstrained frontier (no budget) - use Epoch blue
-    # Draw dashed where it overlaps with highest budget, solid otherwise
     unconstrained = best_under_budget(df, None)
-    trans_unc = get_transitions(unconstrained)
-    color_unc = "#4E79A7"  # steel blue for "no budget"
 
-    # Get highest budget data for overlap detection
-    highest_budget = max(budgets)
-    highest_budget_data = budget_data[highest_budget]
+    # Build step function interpolators for all budget lines
+    budget_interp = {}
+    for B in budgets:
+        bd = budget_data[B]
+        budget_interp[B] = {
+            "dates": list(bd["Date"]),
+            "scores": list(bd["Score_logit"]),
+        }
 
-    # Create sorted lists for step function interpolation
-    hb_dates = list(highest_budget_data["Date"])
-    hb_scores_list = list(highest_budget_data["Score_logit"])
-
-    def get_hb_score_at_date(query_date):
-        """Get the $10 line's score at a given date (step function: carry forward)."""
+    def get_budget_score_at_date(B, query_date):
+        """Get a budget line's score at a given date (step function)."""
+        dates_list = budget_interp[B]["dates"]
+        scores_list = budget_interp[B]["scores"]
         score = None
-        for i, d in enumerate(hb_dates):
+        for i, d in enumerate(dates_list):
             if d <= query_date:
-                score = hb_scores_list[i]
+                score = scores_list[i]
             else:
                 break
         return score
 
-    # Draw segments: dashed where overlapping, solid otherwise
+    def check_vertical_overlap(my_y1, my_y2, other_budgets, query_date):
+        """Check if vertical segment overlaps with any other budget's vertical segment."""
+        my_ymin, my_ymax = min(my_y1, my_y2), max(my_y1, my_y2)
+        for B in other_budgets:
+            # Get score before and after this date
+            before = get_budget_score_at_date(B, query_date - pd.Timedelta(days=1))
+            after = get_budget_score_at_date(B, query_date)
+            if before is None or after is None:
+                continue
+            if abs(before - after) < 0.01:
+                continue  # No vertical jump
+            other_ymin, other_ymax = min(before, after), max(before, after)
+            # Check if y-ranges overlap
+            if not (my_ymax < other_ymin or my_ymin > other_ymax):
+                return True
+        return False
+
+    # Draw budget lines - higher budgets dash where they overlap with LOWER budgets
+    sorted_budgets = sorted(budgets)  # Draw from lowest to highest
+
+    for idx, B in enumerate(sorted_budgets):
+        sub = budget_data[B]
+        if len(sub) == 0:
+            continue
+
+        # Find original index for color
+        orig_idx = budgets.index(B)
+        color = EPOCH_COLORS[orig_idx % len(EPOCH_COLORS)]
+        trans = get_transitions(sub)
+        zorder = 5 + idx
+
+        # Get list of LOWER budget lines to check overlap against
+        lower_budgets = sorted_budgets[:idx]
+
+        dates = list(sub["Date"])
+        scores = list(sub["Score_logit"])
+
+        for j in range(len(dates) - 1):
+            d1, d2 = dates[j], dates[j + 1]
+            s1 = scores[j]
+
+            # Check if overlaps with any LOWER budget line
+            is_overlap = False
+            for lb in lower_budgets:
+                lb_score = get_budget_score_at_date(lb, d1)
+                if lb_score is not None and abs(s1 - lb_score) < 0.01:
+                    is_overlap = True
+                    break
+
+            linestyle = (0, (4, 2)) if is_overlap else "-"
+
+            ax.plot(
+                [d1, d2], [s1, s1],
+                linewidth=3.5, linestyle=linestyle, color=color,
+                zorder=zorder, solid_capstyle="butt",
+            )
+
+            # Vertical segment - check for overlap with lower budgets
+            if j < len(dates) - 1:
+                s2 = scores[j + 1]
+                vert_overlap = check_vertical_overlap(s1, s2, lower_budgets, d2)
+                vert_linestyle = (0, (4, 2)) if vert_overlap else "-"
+                ax.plot(
+                    [d2, d2], [s1, s2],
+                    linewidth=3.5, linestyle=vert_linestyle, color=color, zorder=zorder,
+                )
+
+        ax.scatter(
+            trans["Date"], trans["Score_logit"],
+            s=70, color=color, zorder=zorder + 1,
+            edgecolors="white", linewidths=2,
+        )
+
+        label = f"${B:g}" if B >= 1 else f"${B:.2f}"
+        line_data.append({
+            "label": label, "color": color,
+            "end_date": sub["Date"].iloc[-1],
+            "end_score": sub["Score_logit"].iloc[-1],
+        })
+
+    # Draw "Any Budget" line - dashes where it overlaps with ANY budget line
+    color_unc = "#4E79A7"
+    trans_unc = get_transitions(unconstrained)
+
     dates = list(unconstrained["Date"])
     scores = list(unconstrained["Score_logit"])
 
@@ -234,69 +278,42 @@ def main():
         d1, d2 = dates[j], dates[j + 1]
         s1 = scores[j]
 
-        # Check if this horizontal segment overlaps with highest budget line
-        # Get the $10 score that would be active during [d1, d2)
-        hb_score = get_hb_score_at_date(d1)
-        is_overlap = hb_score is not None and abs(s1 - hb_score) < 0.01
+        # Check overlap with ANY budget line
+        is_overlap = False
+        for B in budgets:
+            b_score = get_budget_score_at_date(B, d1)
+            if b_score is not None and abs(s1 - b_score) < 0.01:
+                is_overlap = True
+                break
 
         linestyle = (0, (4, 2)) if is_overlap else "-"
 
         ax.plot(
-            [d1, d2],
-            [s1, s1],
-            linewidth=3.5,
-            linestyle=linestyle,
-            color=color_unc,
-            zorder=10,
-            solid_capstyle="butt",
+            [d1, d2], [s1, s1],
+            linewidth=3.5, linestyle=linestyle, color=color_unc,
+            zorder=10, solid_capstyle="butt",
         )
 
-        # Vertical segment for step - check if it overlaps with $10's vertical segment
+        # Vertical segment - check for overlap with any budget line
         if j < len(dates) - 1:
             s2 = scores[j + 1]
-            # Check if $10 also has a vertical segment at d2 that overlaps
-            hb_score_before = get_hb_score_at_date(d2 - pd.Timedelta(days=1))
-            hb_score_after = get_hb_score_at_date(d2)
-
-            # Vertical overlap: both lines have vertical segments at same x,
-            # and the y-ranges overlap
-            has_hb_vertical = hb_score_before != hb_score_after if (hb_score_before and hb_score_after) else False
-
-            if has_hb_vertical and hb_score_before and hb_score_after:
-                # Check if vertical segments overlap in y
-                unc_ymin, unc_ymax = min(s1, s2), max(s1, s2)
-                hb_ymin, hb_ymax = min(hb_score_before, hb_score_after), max(hb_score_before, hb_score_after)
-                vertical_overlap = not (unc_ymax < hb_ymin or unc_ymin > hb_ymax)
-                vert_linestyle = (0, (4, 2)) if vertical_overlap else "-"
-            else:
-                vert_linestyle = "-"
-
+            vert_overlap = check_vertical_overlap(s1, s2, budgets, d2)
+            vert_linestyle = (0, (4, 2)) if vert_overlap else "-"
             ax.plot(
-                [d2, d2],
-                [s1, s2],
-                linewidth=3.5,
-                linestyle=vert_linestyle,
-                color=color_unc,
-                zorder=10,
+                [d2, d2], [s1, s2],
+                linewidth=3.5, linestyle=vert_linestyle, color=color_unc, zorder=10,
             )
 
     ax.scatter(
-        trans_unc["Date"],
-        trans_unc["Score_logit"],
-        s=70,
-        color=color_unc,
-        zorder=11,
-        edgecolors="white",
-        linewidths=2,
+        trans_unc["Date"], trans_unc["Score_logit"],
+        s=70, color=color_unc, zorder=11,
+        edgecolors="white", linewidths=2,
     )
-    line_data.append(
-        {
-            "label": "Any Budget",
-            "color": color_unc,
-            "end_date": unconstrained["Date"].iloc[-1],
-            "end_score": unconstrained["Score_logit"].iloc[-1],
-        }
-    )
+    line_data.append({
+        "label": "Any Budget", "color": color_unc,
+        "end_date": unconstrained["Date"].iloc[-1],
+        "end_score": unconstrained["Score_logit"].iloc[-1],
+    })
 
     # =========================================================================
     # STYLING
