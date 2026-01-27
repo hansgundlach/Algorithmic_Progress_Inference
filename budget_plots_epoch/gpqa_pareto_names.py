@@ -558,9 +558,11 @@ def main():
         pad=12,
     )
 
-    # Grid
+    # Grid (major only, no minor ticks/grid)
     ax.grid(True, which="major", linestyle="--", linewidth=0.5, alpha=0.5, zorder=0)
-    ax.grid(True, which="minor", linestyle=":", linewidth=0.3, alpha=0.3, zorder=0)
+
+    # Disable minor ticks on x-axis
+    ax.xaxis.set_minor_locator(plt.NullLocator())
 
     # Tick sizes
     ax.tick_params(axis="both", which="major", labelsize=TICK_LABELSIZE)
