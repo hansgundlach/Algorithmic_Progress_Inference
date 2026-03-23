@@ -12,7 +12,19 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
+
+_sys_dir = Path(__file__).resolve().parent
+if str(_sys_dir) not in sys.path:
+    sys.path.insert(0, str(_sys_dir))
+
+from gpqa_pareto_pair_layout import (  # noqa: E402
+    PAIR_FIGSIZE_INCHES,
+    PAIR_XMIN, PAIR_XMAX, PAIR_YMIN, PAIR_YMAX,
+    apply_pair_layout,
+    savefig_pair,
+)
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -169,9 +181,8 @@ def main():
     # STYLE PARAMETERS (easily adjustable)
     # =========================================================================
 
-    # Figure size for ICML dual-column
-    FIG_WIDTH = 7.0
-    FIG_HEIGHT = 6.0
+    # Figure size — shared with moe_dense_pareto_frontier.py
+    FIG_WIDTH, FIG_HEIGHT = PAIR_FIGSIZE_INCHES
 
     # Font sizes - large for ICML readability
     TICK_LABELSIZE = 12
@@ -190,18 +201,20 @@ def main():
     COLOR_FRONTIER = "#2C3E50"  # Dark blue for frontier line
 
     # =========================================================================
-    # AXIS LIMITS (easily adjustable)
+    # AXIS LIMITS — shared with moe_dense_pareto_frontier.py
     # =========================================================================
-    XMIN = 0.001 * 0.5
-    XMAX = 100
-    YMIN = 0.08
-    YMAX = 0.90
+    XMIN = PAIR_XMIN
+    XMAX = PAIR_XMAX
+    YMIN = PAIR_YMIN
+    YMAX = PAIR_YMAX
 
     # Label placement parameters
     LABEL_X_OFFSET = -15  # Points to the left of data point
     MIN_LABEL_GAP = 22  # Minimum vertical gap between labels (in points)
     ARROW_COLOR_ALPHA = 0.5
-    LABEL_FONTWEIGHT = 'heavy'  # Options: 'normal', 'bold', 'heavy', or numeric (400, 700, 900)
+    LABEL_FONTWEIGHT = (
+        "heavy"  # Options: 'normal', 'bold', 'heavy', or numeric (400, 700, 900)
+    )
 
     # =========================================================================
     # LOAD AND PREPARE DATA
@@ -240,7 +253,11 @@ def main():
     plt.rcParams.update(
         {
             "font.family": "sans-serif",
-            "font.sans-serif": ["DejaVu Sans", "Helvetica", "Arial"],  # DejaVu has good bold support
+            "font.sans-serif": [
+                "DejaVu Sans",
+                "Helvetica",
+                "Arial",
+            ],  # DejaVu has good bold support
             "font.size": 10,
         }
     )
@@ -552,10 +569,10 @@ def main():
     ax.set_xlabel("Benchmark Cost (USD)", fontsize=AXIS_LABELSIZE, fontweight="bold")
     ax.set_ylabel("Error Rate", fontsize=AXIS_LABELSIZE, fontweight="bold")
     ax.set_title(
-        "GPQA-D: Pareto Frontier with Model Names",
+        "GPQA-D Pareto Frontier\nwith Model Names",
         fontsize=TITLE_FONTSIZE,
         fontweight="bold",
-        pad=12,
+        pad=8,
     )
 
     # Grid (major only, no minor ticks/grid)
@@ -583,20 +600,19 @@ def main():
         edgecolor="gray",
     )
 
-    plt.tight_layout()
+    # Fixed margins — must match moe_dense_pareto_frontier.py for identical axes boxes
+    apply_pair_layout(fig)
 
     # =========================================================================
     # SAVE
     # =========================================================================
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(
-        args.out, dpi=300, bbox_inches="tight", facecolor="white", edgecolor="none"
-    )
+    savefig_pair(fig, args.out, dpi=300)
     print(f"Saved: {args.out}")
 
     pdf_out = args.out.replace(".png", ".pdf")
-    plt.savefig(pdf_out, bbox_inches="tight", facecolor="white", edgecolor="none")
+    savefig_pair(fig, pdf_out, dpi=300)
     print(f"Saved: {pdf_out}")
 
     plt.show()
