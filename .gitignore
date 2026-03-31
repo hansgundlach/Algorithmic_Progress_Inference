@@ -1,6 +1,5 @@
 #ignore figures and dataset folders
 
-/figures
 /datasets
 /beta_material
 /unsynced
