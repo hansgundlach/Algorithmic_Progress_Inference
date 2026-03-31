@@ -146,7 +146,7 @@ def main():
     # CREATE FIGURE
     # =========================================================================
 
-    fig, ax = plt.subplots(figsize=(11, 6.5))
+    fig, ax = plt.subplots(figsize=(11, 7.5))
 
     # Find transition points for markers
     def get_transitions(data):
