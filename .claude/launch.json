@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Jupyter Notebook Server",
+      "runtimeExecutable": "jupyter",
+      "runtimeArgs": ["notebook", "--no-browser", "--port=8888"],
+      "port": 8888
+    },
+    {
+      "name": "JupyterLab",
+      "runtimeExecutable": "jupyter",
+      "runtimeArgs": ["lab", "--no-browser", "--port=8889"],
+      "port": 8889
+    }
+  ]
+}
