@@ -545,7 +545,7 @@ def main() -> None:
         description="MoE vs Dense separate Pareto frontiers (GPQA-D)."
     )
     parser.add_argument(
-        "--data", default="../data/price_reduction_models.csv", help="CSV path"
+        "--data", default="../data/gpqa_price_reduction_models.csv", help="CSV path"
     )
     parser.add_argument(
         "--out",

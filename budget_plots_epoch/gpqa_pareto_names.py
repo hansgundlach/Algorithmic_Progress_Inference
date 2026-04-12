@@ -173,7 +173,7 @@ def place_labels_no_overlap(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="../data/price_reduction_models.csv")
+    parser.add_argument("--data", default="../data/gpqa_price_reduction_models.csv")
     parser.add_argument("--out", default="../figures/gpqa_pareto_with_names.png")
     args = parser.parse_args()
 

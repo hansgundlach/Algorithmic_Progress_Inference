@@ -1,10 +1,11 @@
 \begin{table}
-\caption{Regression Results Across Benchmarks and Restrictions (Including ARC-AGI)}
-\label{tab:regression_results_with_arc}
+\centering
+\caption{Regression Results (Hardware-Adjusted, ÷ 1/0.7)}
+\label{tab:regression_results_hw_adjusted}
 \begin{tabular}{|l|l|c|c|c|c|}
-\toprule
+\hline
 Benchmark & Restriction & Year Decrease Factor & 90% CI & n & R² \\
-\midrule
+\hline
 GPQA & Pareto Restricted All License & 3.720 & [1.714, 8.074] & 53 & 0.8304 \\
  & Pareto Restricted Open License & 3.221 & [1.536, 6.754] & 35 & 0.7272 \\
 GPQA & All License (no restriction) & 2.071 & [1.174, 3.654] & 138 & 0.6615 \\
@@ -21,6 +22,6 @@ ARC-AGI & Pareto Restricted All License & 8.541 & [4.561, 15.993] & 43 & 0.6870 
  & Pareto Restricted Open License & 0.319 & [0.086, 1.176] & 10 & 0.7631 \\
 ARC-AGI & All License (no restriction) & 2.319 & [1.374, 3.915] & 86 & 0.5378 \\
  & Open License (no restriction) & 0.480 & [0.111, 2.066] & 11 & 0.7846 \\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}

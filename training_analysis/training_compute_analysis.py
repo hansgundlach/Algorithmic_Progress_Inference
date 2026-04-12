@@ -276,9 +276,9 @@ print("\n" + "="*80)
 print("1. GPQA DIAMOND ANALYSIS")
 print("="*80)
 
-# Load GPQA data from price_reduction_models.csv
-gpqa_df = pd.read_csv('data/price_reduction_models.csv')
-print(f"Loaded {len(gpqa_df)} models from price_reduction_models.csv")
+# Load GPQA data from gpqa_price_reduction_models.csv
+gpqa_df = pd.read_csv('data/gpqa_price_reduction_models.csv')
+print(f"Loaded {len(gpqa_df)} models from gpqa_price_reduction_models.csv")
 
 # Extract relevant columns
 gpqa_df = gpqa_df[['Model', 'GPQA Diamond (Scientific Reasoning)', 'Release Date',
@@ -386,9 +386,9 @@ print("\n" + "="*80)
 print("2. AIME ANALYSIS")
 print("="*80)
 
-# Load AIME data from aime_price_reduction_models.csv
-aime_df = pd.read_csv('data/aime_price_reduction_models.csv')
-print(f"Loaded {len(aime_df)} models from aime_price_reduction_models.csv")
+# Load AIME data from aime_gpqa_price_reduction_models.csv
+aime_df = pd.read_csv('data/aime_gpqa_price_reduction_models.csv')
+print(f"Loaded {len(aime_df)} models from aime_gpqa_price_reduction_models.csv")
 
 # Extract relevant columns
 aime_df = aime_df[['Model', 'oneshot_AIME', 'Release Date',
@@ -507,9 +507,9 @@ print("\n" + "="*80)
 print("3. SWE-BENCH ANALYSIS")
 print("="*80)
 
-# Load SWE data from swe_price_reduction_models.csv
-swe_df = pd.read_csv('data/swe_price_reduction_models.csv')
-print(f"Loaded {len(swe_df)} models from swe_price_reduction_models.csv")
+# Load SWE data from swe_gpqa_price_reduction_models.csv
+swe_df = pd.read_csv('data/swe_gpqa_price_reduction_models.csv')
+print(f"Loaded {len(swe_df)} models from swe_gpqa_price_reduction_models.csv")
 
 # Extract relevant columns
 swe_df = swe_df[['Model', 'epoch_swe', 'Release Date',

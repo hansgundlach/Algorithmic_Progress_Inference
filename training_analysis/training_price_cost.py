@@ -15,7 +15,7 @@ def inverse_logit(logit_val):
     return 1 / (1 + np.exp(-logit_val))
 
 # Load the data
-df = pd.read_csv('data/price_reduction_models.csv')
+df = pd.read_csv('data/gpqa_price_reduction_models.csv')
 
 # Convert Release Date to datetime
 df['Release Date'] = pd.to_datetime(df['Release Date'])

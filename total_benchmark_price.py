@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 # %%
 
 
-df = pd.read_csv("data/price_reduction_models.csv")
+df = pd.read_csv("data/gpqa_price_reduction_models.csv")
 print(df.columns)
 # convert price to float
 # df['Output Price\nUSD/1M Tokens'] = df['Output Price\nUSD/1M Tokens'].str.replace('$', '').astype(float)
@@ -43,7 +43,7 @@ df["Active Parameters"] = np.where(
 
 # %%
 def plot_benchmark_price_vs_time(
-    csv_file="price_reduction_models.csv",
+    csv_file="gpqa_price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_gpqa",
     min_benchmark=None,
@@ -71,7 +71,7 @@ def plot_benchmark_price_vs_time(
     Graph total price for any benchmark vs release date with overall fit capability.
 
     Parameters:
-    - csv_file: Path to CSV file (default: "price_reduction_models.csv")
+    - csv_file: Path to CSV file (default: "gpqa_price_reduction_models.csv")
     - price_col: Price column name (default: "Benchmark Cost USD")
     - benchmark_col: Benchmark column name (default: "epoch_gpqa")
     - min_benchmark: Minimum benchmark score to include
@@ -865,7 +865,7 @@ def plot_benchmark_price_vs_time(
 
 # Example usage for SWE:
 plot_benchmark_price_vs_time(
-    csv_file="data/swe_price_reduction_models.csv",
+    csv_file="data/swe_gpqa_price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_swe",
     open_license_only=False,
@@ -886,7 +886,7 @@ plot_benchmark_price_vs_time(
 
 # Example Usage for GRQA-Diamond
 plot_benchmark_price_vs_time(
-    csv_file="data/price_reduction_models.csv",
+    csv_file="data/gpqa_price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_gpqa",
     open_license_only=False,

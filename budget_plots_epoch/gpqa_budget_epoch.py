@@ -74,7 +74,7 @@ def best_under_budget(df: pd.DataFrame, budget: float | None) -> pd.DataFrame:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="../data/price_reduction_models.csv")
+    parser.add_argument("--data", default="../data/gpqa_price_reduction_models.csv")
     parser.add_argument("--budgets", default="0.1,1,10")
     parser.add_argument("--out", default="../figures/gpqa_budget_epoch.png")
     args = parser.parse_args()

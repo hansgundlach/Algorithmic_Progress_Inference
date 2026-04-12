@@ -960,7 +960,7 @@ def main():
         {
             "name": "GPQA-Diamond",
             "input_file": "data/merged_with_training_compute.csv",
-            "output_file": "data/price_reduction_models.csv",
+            "output_file": "data/gpqa_price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
             "reasoning_token_col": "gpqa_reasoning_tokens",

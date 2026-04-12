@@ -121,7 +121,7 @@ def get_pareto_frontier(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="../data/price_reduction_models.csv")
+    parser.add_argument("--data", default="../data/gpqa_price_reduction_models.csv")
     parser.add_argument("--out", default="../figures/gpqa_pareto_frontier.png")
     args = parser.parse_args()
 
