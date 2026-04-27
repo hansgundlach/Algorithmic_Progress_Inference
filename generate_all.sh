@@ -93,9 +93,27 @@ popd > /dev/null
 echo ""
 
 # ──────────────────────────────────────────────
-# Step 4: Generate table_as_graph (reads regression CSV)
+# Step 4: Generate total_benchmark_price figures
 # ──────────────────────────────────────────────
-echo "=== Step 4: Generating table_as_graph ==="
+echo "=== Step 4: Generating total_benchmark_price figures ==="
+python3 total_benchmark_price.py
+echo ""
+
+# ──────────────────────────────────────────────
+# Step 5: Generate bucket_figure_trends (notebook)
+# ──────────────────────────────────────────────
+echo "=== Step 5: Generating bucket_figure_trends ==="
+jupyter nbconvert --to notebook --execute bucket_figure_trends.ipynb \
+    --output /tmp/bucket_figure_trends_executed.ipynb \
+    --ExecutePreprocessor.timeout=120 \
+    2>&1 | tail -1
+echo "  -> figures/gpqa_open_license_bucket.png, aime_open_license_bucket.png, etc."
+echo ""
+
+# ──────────────────────────────────────────────
+# Step 6: Generate table_as_graph (reads regression CSV)
+# ──────────────────────────────────────────────
+echo "=== Step 6: Generating table_as_graph ==="
 jupyter nbconvert --to notebook --execute table_as_graph.ipynb \
     --output /tmp/table_as_graph_executed.ipynb \
     --ExecutePreprocessor.timeout=120 \

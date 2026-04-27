@@ -122,12 +122,17 @@ def calculate_benchmark_cost(
     ):
         return np.nan
 
-    # Convert string values to numeric, handling any formatting issues
+    # Convert string values to numeric, handling formatting ($, commas, scientific notation)
+    def _to_float(val):
+        if isinstance(val, str):
+            val = val.replace("$", "").replace(",", "").strip()
+        return float(val)
+
     try:
-        input_tokens = float(input_tokens)
-        output_tokens = float(output_tokens)
-        input_price = float(input_price)
-        output_price = float(output_price)
+        input_tokens = _to_float(input_tokens)
+        output_tokens = _to_float(output_tokens)
+        input_price = _to_float(input_price)
+        output_price = _to_float(output_price)
     except (ValueError, TypeError):
         return np.nan
 
@@ -495,6 +500,19 @@ def process_price_history(
 
             input_price = row.get(input_price_col, np.nan)
             output_price = row.get(output_price_col, np.nan)
+
+            # Strip dollar signs and commas from price strings
+            # (older columns are pre-parsed as floats, newer ones may be strings like "$5.00")
+            if isinstance(input_price, str):
+                try:
+                    input_price = float(input_price.replace("$", "").replace(",", ""))
+                except (ValueError, TypeError):
+                    input_price = np.nan
+            if isinstance(output_price, str):
+                try:
+                    output_price = float(output_price.replace("$", "").replace(",", ""))
+                except (ValueError, TypeError):
+                    output_price = np.nan
 
             # Check for partial price data (one price present but not the other)
             has_input_price = not pd.isna(input_price)
@@ -959,7 +977,7 @@ def main():
     configurations = [
         {
             "name": "GPQA-Diamond",
-            "input_file": "data/merged_with_training_compute.csv",
+            "input_file": "data/inference_data_new_large.csv",
             "output_file": "data/gpqa_price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
@@ -975,7 +993,7 @@ def main():
         },
         {
             "name": "SWE-Bench",
-            "input_file": "data/merged_with_training_compute.csv",
+            "input_file": "data/inference_data_new_large.csv",
             "output_file": "data/swe_price_reduction_models.csv",
             "input_token_col": "input tokens swe",
             "output_token_col": "output tokens swe",
@@ -991,7 +1009,7 @@ def main():
         },
         {
             "name": "AIME",
-            "input_file": "data/merged_with_training_compute.csv",
+            "input_file": "data/inference_data_new_large.csv",
             "output_file": "data/aime_price_reduction_models.csv",
             "input_token_col": "input tokens AIME",
             "output_token_col": "output tokens AIME",

@@ -21,7 +21,8 @@ from sklearn.linear_model import LinearRegression
 
 def logit(p: np.ndarray | float) -> np.ndarray | float:
     """Convert probability to logit scale."""
-    p_clipped = np.clip(p, 0.001, 0.999)
+    # Cap at [0.5%, 99.5%] to prevent extreme logit values (logit is undefined at 0 and 1).
+    p_clipped = np.clip(p, 0.005, 0.995)
     return np.log(p_clipped / (1 - p_clipped))
 
 

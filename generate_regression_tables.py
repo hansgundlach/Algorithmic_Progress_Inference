@@ -55,7 +55,9 @@ def plot_price_mmlu_regression(
 
     if use_logit:
         proportions = df_work[mmlu_col] / 100.0
-        proportions = np.clip(proportions, 1e-10, 1 - 1e-10)
+        # Cap at [0.5%, 99.5%] to prevent extreme logit values from
+        # dominating the regression (logit is undefined at 0 and 1).
+        proportions = np.clip(proportions, 0.005, 0.995)
         df_work[f"{mmlu_col}_logit"] = np.log(proportions / (1 - proportions))
         mmlu_col_transformed = f"{mmlu_col}_logit"
     else:

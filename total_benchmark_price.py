@@ -110,14 +110,13 @@ def plot_benchmark_price_vs_time(
 
     # 1) Clean benchmark column
     if benchmark_col in df_work.columns:
-        # Handle percentage format if present
-        if df_work[benchmark_col].dtype == "object":
-            df_work[benchmark_col] = (
-                df_work[benchmark_col]
-                .astype(str)
-                .str.replace("%", "", regex=False)
-                .str.replace("nan", "")
-            )
+        # Always convert via string to handle %, works for both object and str dtypes
+        df_work[benchmark_col] = (
+            df_work[benchmark_col]
+            .astype(str)
+            .str.replace("%", "", regex=False)
+            .str.replace("nan", "")
+        )
         df_work[benchmark_col] = pd.to_numeric(df_work[benchmark_col], errors="coerce")
     else:
         print(f"Warning: Benchmark column '{benchmark_col}' not found!")
@@ -126,10 +125,9 @@ def plot_benchmark_price_vs_time(
 
     # 2) Clean price column
     if price_col in df_work.columns:
-        if df_work[price_col].dtype == "object":
-            df_work[price_col] = (
-                df_work[price_col].astype(str).str.replace("[$,]", "", regex=True)
-            )
+        df_work[price_col] = (
+            df_work[price_col].astype(str).str.replace("[$,]", "", regex=True)
+        )
         df_work[price_col] = pd.to_numeric(df_work[price_col], errors="coerce")
     else:
         print(f"Warning: Price column '{price_col}' not found!")
@@ -865,7 +863,7 @@ def plot_benchmark_price_vs_time(
 
 # Example usage for SWE:
 plot_benchmark_price_vs_time(
-    csv_file="data/swe_gpqa_price_reduction_models.csv",
+    csv_file="data/swe_price_reduction_models.csv",
     price_col="Benchmark Cost USD",
     benchmark_col="epoch_swe",
     open_license_only=False,
@@ -879,8 +877,8 @@ plot_benchmark_price_vs_time(
     benchmark_label="SWE-bench V",  # <-- Example: change label here
     save_path="figures/swe_total_bench.png",  # <-- Example: save figure to file
     min_x_date="2024-03-01",  # <-- Set x-axis start date
-    max_x_date="2025-11-01",  # <-- Set x-axis end date
-    min_y_price=.001,
+    max_x_date="2026-06-01",  # <-- Set x-axis end date
+    min_y_price=0.001,
 )
 # %%
 
@@ -900,8 +898,29 @@ plot_benchmark_price_vs_time(
     benchmark_label="GPQA-Diamond",  # <-- Example: change label here
     save_path="figures/gpqa_total_bench.png",  # <-- Example: save figure to file
     min_x_date="2024-03-01",  # <-- Set x-axis start date (same as SWE for consistency)
-    max_x_date="2025-11-01",  # <-- Set x-axis end date (same as SWE for consistency)
+    max_x_date="2026-06-01",  # <-- Set x-axis end date (same as SWE for consistency)
     max_y_price=1000,
+)
+
+# %%
+
+# Example Usage for AIME
+plot_benchmark_price_vs_time(
+    csv_file="data/aime_price_reduction_models.csv",
+    price_col="Benchmark Cost USD",
+    benchmark_col="oneshot_AIME",
+    open_license_only=False,
+    min_date="2024-01-01",
+    confidence_interval=False,
+    fit_overall_trend=True,
+    show_model_names=False,
+    use_quantile_regression=False,
+    quantile=0.9,
+    record_price_trend=False,
+    benchmark_label="AIME",
+    save_path="figures/aime_total_bench.png",
+    min_x_date="2024-03-01",
+    max_x_date="2026-06-01",
 )
 
 # %%

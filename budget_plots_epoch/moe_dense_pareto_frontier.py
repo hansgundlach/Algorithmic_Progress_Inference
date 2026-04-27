@@ -568,6 +568,8 @@ def main() -> None:
         raise SystemExit(f"Data file not found: {data_path}")
 
     df = pd.read_csv(data_path)
+    # Only include models with known parameter counts (required for MoE vs Dense classification)
+    df = df[df["Parameters"].notna()].copy()
     df["MoE"] = df["Known Active Parameters"].notna()
 
     title = "MoE vs Dense Pareto Frontiers\nGPQA-D (Open Weight Only)"
@@ -590,6 +592,7 @@ def main() -> None:
         save_path=str(Path(args.out).resolve()),
         show_plot=not args.no_show,
     )
+    
 
 
 if __name__ == "__main__":

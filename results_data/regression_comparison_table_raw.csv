@@ -1,15 +1,15 @@
 Benchmark,Restriction,Year Decrease Factor,90% CI,n,R²
-GPQA,Pareto Restricted All License,5.315,"[2.449, 11.534]",53,0.8304
-,Pareto Restricted Open License,4.602,"[2.195, 9.648]",35,0.7272
-GPQA,All License (no restriction),2.959,"[1.678, 5.220]",138,0.6615
-,Open License (no restriction),1.044,"[0.551, 1.976]",75,0.5422
-AIME,Pareto Restricted All License,11.664,"[5.250, 25.911]",42,0.7846
-,Pareto Restricted Open License,4.680,"[1.943, 11.273]",30,0.7539
-AIME,All License (no restriction),6.988,"[3.687, 13.243]",109,0.6287
-,Open License (no restriction),2.661,"[1.373, 5.157]",55,0.7087
-SWE-Bench,Pareto Restricted All License,4.675,"[0.680, 32.156]",13,0.6281
+GPQA,Pareto Restricted All License,9.026,"[3.907, 20.854]",57,0.8152
+,Pareto Restricted Open License,3.968,"[2.187, 7.202]",43,0.8297
+GPQA,All License (no restriction),4.415,"[2.578, 7.561]",163,0.6585
+,Open License (no restriction),1.368,"[0.757, 2.473]",84,0.6000
+AIME,Pareto Restricted All License,12.240,"[5.368, 27.908]",49,0.7870
+,Pareto Restricted Open License,6.993,"[2.594, 18.852]",31,0.6629
+AIME,All License (no restriction),5.692,"[3.102, 10.443]",132,0.6411
+,Open License (no restriction),3.165,"[1.574, 6.365]",60,0.6380
+SWE-Bench,Pareto Restricted All License,5.926,"[0.887, 39.611]",16,0.5172
 ,Pareto Restricted Open License,4.528,"[nan, nan]",3,1.0000
-SWE-Bench,All License (no restriction),1.603,"[0.373, 6.881]",21,0.1628
+SWE-Bench,All License (no restriction),1.290,"[0.341, 4.878]",26,0.2013
 ,Open License (no restriction),0.248,"[0.000, 99266.244]",5,0.3222
 ARC-AGI,Pareto Restricted All License,12.201,"[6.516, 22.847]",43,0.6870
 ,Pareto Restricted Open License,0.456,"[0.123, 1.681]",10,0.7631

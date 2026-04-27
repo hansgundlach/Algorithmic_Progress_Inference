@@ -21,7 +21,10 @@ if str(_sys_dir) not in sys.path:
 
 from aime_pareto_pair_layout import (  # noqa: E402
     PAIR_FIGSIZE_INCHES,
-    PAIR_XMIN, PAIR_XMAX, PAIR_YMIN, PAIR_YMAX,
+    PAIR_XMIN,
+    PAIR_XMAX,
+    PAIR_YMIN,
+    PAIR_YMAX,
     apply_pair_layout,
     savefig_pair,
 )
@@ -73,11 +76,15 @@ def clean_model_name(name) -> str:
     name = re.sub(r"\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b", "", name)
     name = re.sub(
         r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s*\d{4}\b",
-        "", name, flags=re.IGNORECASE,
+        "",
+        name,
+        flags=re.IGNORECASE,
     )
     name = re.sub(
         r"\b\d{4}\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b",
-        "", name, flags=re.IGNORECASE,
+        "",
+        name,
+        flags=re.IGNORECASE,
     )
     name = re.sub(r"\s+20\d{2}\s*$", "", name)
     name = re.sub(r"\s+", " ", name).strip()
@@ -134,7 +141,9 @@ def plot_separate_moe_dense_frontiers(
             & df_work["License"].str.contains("open", case=False, na=False)
         ]
 
-    df_work = df_work.dropna(subset=["Release Date", price_col, "error_rate", benchmark_col, moe_col])
+    df_work = df_work.dropna(
+        subset=["Release Date", price_col, "error_rate", benchmark_col, moe_col]
+    )
     df_work = df_work[df_work[price_col] > 0]
     df_work = df_work[df_work[benchmark_col] > 0]
 
@@ -212,17 +221,33 @@ def plot_separate_moe_dense_frontiers(
             leftmost = pareto.iloc[0]
             if leftmost["error_rate"] < max_error:
                 vertical_point = pd.DataFrame(
-                    [{price_col: leftmost[price_col], "error_rate": max_error, "Model": ""}]
+                    [
+                        {
+                            price_col: leftmost[price_col],
+                            "error_rate": max_error,
+                            "Model": "",
+                        }
+                    ]
                 )
-                pareto_extended = pd.concat([vertical_point, pareto_extended], ignore_index=True)
+                pareto_extended = pd.concat(
+                    [vertical_point, pareto_extended], ignore_index=True
+                )
 
             rightmost = pareto.iloc[-1]
             if rightmost[price_col] < max_price:
                 extend_x = max_price if xmax is not None else max_price * 1.5
                 horizontal_point = pd.DataFrame(
-                    [{price_col: extend_x, "error_rate": rightmost["error_rate"], "Model": ""}]
+                    [
+                        {
+                            price_col: extend_x,
+                            "error_rate": rightmost["error_rate"],
+                            "Model": "",
+                        }
+                    ]
                 )
-                pareto_extended = pd.concat([pareto_extended, horizontal_point], ignore_index=True)
+                pareto_extended = pd.concat(
+                    [pareto_extended, horizontal_point], ignore_index=True
+                )
 
             pareto_plot = pareto_extended
         else:
@@ -242,16 +267,26 @@ def plot_separate_moe_dense_frontiers(
                 step_y.append(errors[i])
 
         ax.plot(
-            step_x, step_y,
-            color=color, linestyle="-", linewidth=3,
+            step_x,
+            step_y,
+            color=color,
+            linestyle="-",
+            linewidth=3,
             label=f"{label_prefix} Pareto Frontier",
-            zorder=5, alpha=0.9,
+            zorder=5,
+            alpha=0.9,
         )
 
         ax.scatter(
-            pareto[price_col], pareto["error_rate"],
-            c=color, s=PARETO_POINT_SIZE, marker="o",
-            edgecolors="white", linewidth=2.5, zorder=6, alpha=1.0,
+            pareto[price_col],
+            pareto["error_rate"],
+            c=color,
+            s=PARETO_POINT_SIZE,
+            marker="o",
+            edgecolors="white",
+            linewidth=2.5,
+            zorder=6,
+            alpha=1.0,
         )
 
         if show_model_names:
@@ -259,13 +294,19 @@ def plot_separate_moe_dense_frontiers(
             for _, row in pareto.iterrows():
                 cn = clean_model_name(row["Model"])
                 if cn:
-                    labels.append({"name": cn, "x": row[price_col], "y": row["error_rate"]})
+                    labels.append(
+                        {"name": cn, "x": row[price_col], "y": row["error_rate"]}
+                    )
 
             labels.sort(key=lambda d: d["y"])
             placed_labels = []
 
             for label_info in labels:
-                x_data, y_data, name = label_info["x"], label_info["y"], label_info["name"]
+                x_data, y_data, name = (
+                    label_info["x"],
+                    label_info["y"],
+                    label_info["name"],
+                )
                 x_offset, y_offset = -10, -5
 
                 for placed in placed_labels:
@@ -274,10 +315,17 @@ def plot_separate_moe_dense_frontiers(
 
                 placed_labels.append({"x": x_data, "y": y_data})
                 ax.annotate(
-                    name, (x_data, y_data),
-                    xytext=(x_offset, y_offset), textcoords="offset points",
-                    fontsize=ANNOTATE_FONTSIZE, fontweight="medium", alpha=0.9,
-                    ha="right", va="center", color=color, zorder=7,
+                    name,
+                    (x_data, y_data),
+                    xytext=(x_offset, y_offset),
+                    textcoords="offset points",
+                    fontsize=ANNOTATE_FONTSIZE,
+                    fontweight="medium",
+                    alpha=0.9,
+                    ha="right",
+                    va="center",
+                    color=color,
+                    zorder=7,
                 )
 
     ax.set_xscale("log")
@@ -309,7 +357,9 @@ def plot_separate_moe_dense_frontiers(
     ax.xaxis.set_major_formatter(FuncFormatter(dollar_formatter))
     ax.yaxis.set_major_formatter(PercentFormatter(1.0))
 
-    ax.set_xlabel("Benchmark Cost (USD)", fontsize=AXIS_LABELSIZE, fontweight=AXIS_LABELWEIGHT)
+    ax.set_xlabel(
+        "Benchmark Cost (USD)", fontsize=AXIS_LABELSIZE, fontweight=AXIS_LABELWEIGHT
+    )
     ax.set_ylabel("Error Rate", fontsize=AXIS_LABELSIZE, fontweight=AXIS_LABELWEIGHT)
 
     if title is None:
@@ -317,14 +367,20 @@ def plot_separate_moe_dense_frontiers(
         if open_license_only:
             title += " (Open Weight Only)"
 
-    ax.set_title(title, fontsize=TITLE_FONTSIZE, fontweight=TITLE_FONTWEIGHT, pad=TITLE_PAD)
+    ax.set_title(
+        title, fontsize=TITLE_FONTSIZE, fontweight=TITLE_FONTWEIGHT, pad=TITLE_PAD
+    )
 
     ax.grid(True, which="major", linestyle="--", linewidth=0.5, alpha=0.5, zorder=0)
     ax.tick_params(axis="x", which="minor", bottom=False)
 
     ax.legend(
-        loc="upper right", fontsize=LEGEND_FONTSIZE,
-        frameon=True, fancybox=True, framealpha=0.95, edgecolor="gray",
+        loc="upper right",
+        fontsize=LEGEND_FONTSIZE,
+        frameon=True,
+        fancybox=True,
+        framealpha=0.95,
+        edgecolor="gray",
     )
 
     ax.tick_params(axis="both", which="major", labelsize=TICK_LABELSIZE)
@@ -363,7 +419,8 @@ def main() -> None:
     parser.add_argument("--out", default="../figures/moe_dense_pareto_aime.png")
     parser.add_argument("--show-model-names", action="store_true")
     parser.add_argument(
-        "--no-open-only", action="store_true",
+        "--no-open-only",
+        action="store_true",
         help="Include all licenses (default: open only)",
     )
     parser.add_argument("--no-show", action="store_true")
@@ -374,6 +431,8 @@ def main() -> None:
         raise SystemExit(f"Data file not found: {data_path}")
 
     df = pd.read_csv(data_path)
+    # Only include models with known parameter counts (required for MoE vs Dense classification)
+    df = df[df["Parameters"].notna()].copy()
     df["MoE"] = df["Known Active Parameters"].notna()
 
     title = "MoE vs Dense Pareto Frontiers\nAIME (Open Weight Only)"
@@ -396,6 +455,22 @@ def main() -> None:
         save_path=str(Path(args.out).resolve()),
         show_plot=not args.no_show,
     )
+    # plot_separate_moe_dense_frontiers(
+    #     df,
+    #     price_col="Benchmark Cost USD",
+    #     benchmark_col="oneshot_AIME",
+    #     moe_col="MoE",
+    #     show_model_names=True,
+    #     open_license_only=not args.no_open_only,
+    #     extend_frontier=True,
+    #     xmin=PAIR_XMIN,
+    #     xmax=PAIR_XMAX,
+    #     ymin=PAIR_YMIN,
+    #     ymax=PAIR_YMAX,
+    #     title=title,
+    #     save_path=str(Path(args.out).resolve()),
+    #     show_plot=not args.no_show,
+    # )
 
 
 if __name__ == "__main__":
