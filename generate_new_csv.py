@@ -42,6 +42,41 @@ import re
 import os
 
 
+SOURCE_DATA_FILE = os.environ.get("ECON_EVAL_SOURCE_DATA", "data/new_econ_eval.csv")
+
+CANONICAL_COLUMN_ALIASES = {
+    "Blended\nUSD/1M Tokens": [
+        "Blended\r\n USD/1M Tokens",
+        "Blended Price Standard\n USD/1M Tokens",
+    ],
+    "Input Price\nUSD/1M Tokens": [
+        "Input Price\r\n USD/1M Tokens",
+        "Input Price Standard AA\n USD/1M Tokens",
+    ],
+    "Output Price\nUSD/1M Tokens": [
+        "Output Price\r\n USD/1M Tokens",
+        "Output Price Standard\n USD/1M Tokens",
+    ],
+}
+
+
+def add_compatibility_columns(df):
+    """
+    Add canonical column names expected by downstream code when the cleaned
+    NeurIPS dataset uses publication-friendly names.
+    """
+    added = []
+    for canonical_col, aliases in CANONICAL_COLUMN_ALIASES.items():
+        if canonical_col in df.columns:
+            continue
+        for alias in aliases:
+            if alias in df.columns:
+                df[canonical_col] = df[alias]
+                added.append((canonical_col, alias))
+                break
+    return df, added
+
+
 def parse_date_from_column(col_name):
     """Extract date from column name like '6/1/2024 input price'"""
     match = re.search(r"(\d+/\d+/\d+)", col_name)
@@ -977,7 +1012,7 @@ def main():
     configurations = [
         {
             "name": "GPQA-Diamond",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": SOURCE_DATA_FILE,
             "output_file": "data/gpqa_price_reduction_models.csv",
             "input_token_col": "input_tokens_epoch_gpqa",
             "output_token_col": "output_tokens_epoch_gpqa",
@@ -993,7 +1028,7 @@ def main():
         },
         {
             "name": "SWE-Bench",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": SOURCE_DATA_FILE,
             "output_file": "data/swe_price_reduction_models.csv",
             "input_token_col": "input tokens swe",
             "output_token_col": "output tokens swe",
@@ -1009,7 +1044,7 @@ def main():
         },
         {
             "name": "AIME",
-            "input_file": "data/inference_data_new_large.csv",
+            "input_file": SOURCE_DATA_FILE,
             "output_file": "data/aime_price_reduction_models.csv",
             "input_token_col": "input tokens AIME",
             "output_token_col": "output tokens AIME",
@@ -1038,6 +1073,11 @@ def main():
     try:
         df = pd.read_csv(input_file)
         print(f"\nLoaded {len(df)} rows from {input_file}")
+        df, compatibility_columns = add_compatibility_columns(df)
+        if compatibility_columns:
+            print("Added compatibility columns for downstream scripts:")
+            for canonical_col, source_col in compatibility_columns:
+                print(f"  {canonical_col!r} <- {source_col!r}")
     except FileNotFoundError:
         print(f"Error: Could not find file {input_file}")
         return

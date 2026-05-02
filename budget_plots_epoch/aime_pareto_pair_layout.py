@@ -23,11 +23,12 @@ TICK_LABELSIZE = 12
 AXIS_LABELSIZE = 14
 LEGEND_FONTSIZE = 11
 
-# Shared axis limits — AIME scores range ~0–91%, so error rate ~0.086–0.994
+# Shared axis limits. Scores are plotted as error-rate proportions and formatted
+# as percentages, so 0.0-1.0 displays the full 0%-100% range.
 PAIR_XMIN = 0.001 * 0.5  # 0.0005
 PAIR_XMAX = 100
-PAIR_YMIN = 0.04
-PAIR_YMAX = 1.00
+PAIR_YMIN = 0.0
+PAIR_YMAX = 1.0
 
 # Fixed axes position in figure coordinates (same for every plot in the pair).
 # Top margin is large enough for a **two-line** title; single-line titles get extra

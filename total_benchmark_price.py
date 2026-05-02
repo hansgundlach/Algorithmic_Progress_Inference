@@ -12,8 +12,8 @@ import os
 warnings.filterwarnings("ignore")
 
 # %%
-# df = pd.read_csv('inference_data_new_large.csv')
-# print("All columns in inference_data_new_large.csv:")
+# df = pd.read_csv("data/new_econ_eval.csv")
+# print("All columns in new_econ_eval.csv:")
 # for i, col in enumerate(df.columns):
 #     print(f"{i}: {col}")
 

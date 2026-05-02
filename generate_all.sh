@@ -21,7 +21,7 @@ for arg in "$@"; do
 done
 
 # ──────────────────────────────────────────────
-# Step 1: Generate per-benchmark CSVs from merged_with_training_compute.csv
+# Step 1: Generate per-benchmark CSVs from new_econ_eval.csv
 # ──────────────────────────────────────────────
 if [ "$SKIP_CSV" = false ]; then
     echo "=== Step 1: Generating benchmark CSVs ==="
@@ -119,6 +119,25 @@ jupyter nbconvert --to notebook --execute table_as_graph.ipynb \
     --ExecutePreprocessor.timeout=120 \
     2>&1 | tail -1
 echo "  -> figures/growth_rates.png"
+echo ""
+
+# ──────────────────────────────────────────────
+# Step 7: Generate decomposing_inf_progress (notebook)
+# ──────────────────────────────────────────────
+echo "=== Step 7: Generating decomposing_inference_progress ==="
+jupyter nbconvert --to notebook --execute decomposing_inf_progress.ipynb \
+    --output /tmp/decomposing_inf_progress_executed.ipynb \
+    --ExecutePreprocessor.timeout=120 \
+    2>&1 | tail -1
+echo "  -> figures/decomposing_inference_progress_icml.pdf, decomposing_inference_progress_icml.png"
+echo ""
+
+# ──────────────────────────────────────────────
+# Step 8: Generate compact algorithmic progress bars
+# ──────────────────────────────────────────────
+echo "=== Step 8: Generating algorithmic_progress_bars ==="
+python3 algorithmic_progress_bars.py
+echo "  -> figures/algorithmic_progress_bars_neurips.pdf, algorithmic_progress_bars_neurips.png"
 echo ""
 
 echo "=== Done ==="

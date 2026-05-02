@@ -1,4 +1,4 @@
-# Trends in Inference Efficiency
+# Trends in Evaluation and Inference Efficiency 
 
 Analysis of inference price trends to measure algorithmic progress in language model inference across GPQA-D, AIME, SWE-Bench, and ARC-AGI benchmarks.
 
@@ -10,17 +10,18 @@ Analysis of inference price trends to measure algorithmic progress in language m
 
 This runs the full pipeline:
 
-1. **Generate benchmark CSVs** from `data/merged_with_training_compute.csv` (`generate_new_csv.py`)
+1. **Generate benchmark CSVs** from `data/new_econ_eval.csv` (`generate_new_csv.py`)
 2. **Run regressions** and produce comparison tables (`generate_regression_tables.py`)
 3. **Generate all figures** in `budget_plots_epoch/` (13 scripts: budget epochs, Pareto frontiers, model names, MoE vs dense, multi-benchmark price)
 4. **Generate table-as-graph** figure (`table_as_graph.ipynb`)
+5. **Generate decomposition and compact algorithmic progress figures** (`decomposing_inf_progress.ipynb`, `algorithmic_progress_bars.py`)
 
 Use `--skip-csv` to skip step 1 if source data hasn't changed.
 
 ## Repository Structure
 
 ### Data Pipeline
-- `data/merged_with_training_compute.csv` — source data (model scores, prices over time, training compute)
+- `data/new_econ_eval.csv` — cleaned source dataset for benchmark scores, price history, and evaluation metadata
 - `generate_new_csv.py` — produces per-benchmark CSVs with benchmark cost history:
   - `data/gpqa_price_reduction_models.csv`
   - `data/aime_price_reduction_models.csv`
@@ -41,6 +42,9 @@ Each benchmark (GPQA-D, AIME, SWE-Bench) has:
 - `table_as_graph.ipynb` — regression results as scatter plot with error bars (reads from `results_data/regression_comparison_table_raw.csv`)
 - `decomposing_inf_progress.ipynb` — factor decomposition into competition, hardware, and algorithmic components
 - `main_regresssion.ipynb` — interactive regression exploration
+
+### Compact Figures
+- `algorithmic_progress_bars.py` — small NeurIPS wrapfigure-style three-bar plot of algorithmic progress by benchmark
 
 ### Regression Model
 `log(Price) = alpha * time + beta * logit(benchmark_score) + c`

@@ -23,12 +23,13 @@ TICK_LABELSIZE = 12
 AXIS_LABELSIZE = 14
 LEGEND_FONTSIZE = 11
 
-# Shared axis limits — SWE scores range 16–65%, so error rate ~0.35–0.84
+# Shared axis limits. Scores are plotted as error-rate proportions and formatted
+# as percentages, so 0.0-1.0 displays the full 0%-100% range.
 # Prices range from ~$24 to ~$1416
 PAIR_XMIN = 10
 PAIR_XMAX = 2000
-PAIR_YMIN = 0.30
-PAIR_YMAX = 0.90
+PAIR_YMIN = 0.0
+PAIR_YMAX = 1.0
 
 # Fixed axes position in figure coordinates (same for every plot in the pair).
 # Top margin is large enough for a **two-line** title; single-line titles get extra
