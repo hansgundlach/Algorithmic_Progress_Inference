@@ -35,12 +35,16 @@ def load_and_prepare(path, score_col):
 
 
 def plot_multi_benchmark_price_comparison(
-    df_gpqa, df_swe, df_aime, min_date=None, save_path=None, scatter_alpha=0.65
+    df_gpqa, df_swe, df_aime, min_date=None, save_path=None, scatter_alpha=0.65,
+    show_names=False,
 ):
     """
     Plot the benchmark price of best-performing models over time across
     multiple benchmarks.  For each benchmark, shows the price of models
     with the best performance up to that point.
+
+    Parameters:
+        show_names: If True, annotate each frontier point with the model name.
     """
 
     # ========================================================================
@@ -191,6 +195,19 @@ def plot_multi_benchmark_price_comparison(
             clip_on=True,
         )
 
+        if show_names:
+            for _, row in best.iterrows():
+                ax.annotate(
+                    row["Model"],
+                    xy=(row["Release Date"], row["Benchmark Cost USD"]),
+                    xytext=(4, 4),
+                    textcoords="offset points",
+                    fontsize=5.5,
+                    color=bench["color"],
+                    zorder=6,
+                    clip_on=False,
+                )
+
         print(f"\n{bench['name']} Summary:")
         print(f"  Best models: {len(best)}")
         print(
@@ -199,6 +216,11 @@ def plot_multi_benchmark_price_comparison(
         )
         if annual_factor is not None:
             print(f"  Annual price factor: {annual_factor:.2f}x")
+
+    # Extend right limit so annotations aren't clipped
+    if show_names:
+        x_min, x_max = ax.get_xlim()
+        ax.set_xlim(right=x_max + (x_max - x_min) * 0.12)
 
     # Axes
     ax.set_xlabel("Release Date", fontsize=FONT_SIZE_LABEL)
@@ -290,6 +312,9 @@ def main():
     parser.add_argument(
         "--min-date", default="2024-04-01", help="Minimum date filter (YYYY-MM-DD)"
     )
+    parser.add_argument(
+        "--show-names", action="store_true", help="Annotate frontier points with model names"
+    )
     args = parser.parse_args()
 
     df_gpqa = load_and_prepare(args.gpqa, "epoch_gpqa")
@@ -299,7 +324,8 @@ def main():
     min_date = datetime.strptime(args.min_date, "%Y-%m-%d") if args.min_date else None
 
     plot_multi_benchmark_price_comparison(
-        df_gpqa, df_swe, df_aime, min_date=min_date, save_path=args.out
+        df_gpqa, df_swe, df_aime, min_date=min_date, save_path=args.out,
+        show_names=args.show_names,
     )
 
 
