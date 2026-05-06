@@ -462,6 +462,11 @@ def main():
 
     ax.set_xlabel("Release Date", fontsize=FONT_SIZE_LABEL)
     ax.set_ylabel("GPQA-D Score (logits)", fontsize=FONT_SIZE_LABEL)
+    ax.set_title(
+        "Frontier vs. Price-Adjusted Performance",
+        fontsize=FONT_SIZE_LABEL,
+        pad=6,
+    )
 
     ax.grid(True, alpha=0.25, linewidth=0.5, zorder=0)
     ax.set_axisbelow(True)

@@ -3,15 +3,11 @@ GPQA,Pareto Restricted All License,9.649,"[4.154, 22.408]",55,0.8102
 ,Pareto Restricted Open License,3.968,"[2.187, 7.202]",43,0.8297
 GPQA,All License (no restriction),4.156,"[2.446, 7.062]",166,0.6594
 ,Open License (no restriction),1.273,"[0.709, 2.286]",86,0.6295
-AIME,Pareto Restricted All License,10.918,"[4.721, 25.245]",52,0.7510
+AIME,Pareto Restricted All License,9.759,"[4.193, 22.716]",52,0.7413
 ,Pareto Restricted Open License,5.798,"[2.001, 16.794]",35,0.6612
-AIME,All License (no restriction),6.343,"[3.416, 11.777]",138,0.6081
+AIME,All License (no restriction),6.588,"[3.571, 12.153]",138,0.6166
 ,Open License (no restriction),3.242,"[1.533, 6.856]",66,0.6137
 SWE-Bench,Pareto Restricted All License,5.607,"[0.828, 37.997]",17,0.5447
 ,Pareto Restricted Open License,4.040,"[2.407, 6.782]",6,0.9987
 SWE-Bench,All License (no restriction),1.224,"[0.375, 3.996]",31,0.2585
 ,Open License (no restriction),0.015,"[0.000, 1.045]",9,0.5632
-ARC-AGI,Pareto Restricted All License,12.201,"[6.516, 22.847]",43,0.6870
-,Pareto Restricted Open License,0.456,"[0.123, 1.681]",10,0.7631
-ARC-AGI,All License (no restriction),3.313,"[1.963, 5.593]",86,0.5378
-,Open License (no restriction),0.686,"[0.159, 2.952]",11,0.7846

@@ -1,0 +1,48 @@
+\renewcommand{\arraystretch}{1.2}
+
+\begin{table*}[t]
+\centering
+\caption{Here we show the logit performance trend for all models as well as Pareto and Frontier models (as defined in the paper) with and without price controls.}
+\label{tab:multi_benchmark_regression_rounded}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|l|l|c|c|c|c|c|}
+\hline
+\textbf{Benchmark} &
+\textbf{Sample} &
+\textbf{n} &
+\shortstack{\textbf{Time}\\\textbf{Coef}} &
+\shortstack{\textbf{Time}\\\textbf{SE}} &
+\shortstack{\textbf{Price}\\\textbf{Coef}} &
+\textbf{$R^2$} \\
+\hline
+
+% ===== GPQA-Diamond =====
+GPQA-Diamond & Pareto, Without Price Control & 55 & 1.59 & 0.191 & --- & 0.57 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Pareto, With Price Control & 55 & 0.95 & 0.107 & 0.250 & 0.89 \\ \cline{2-7}
+\cellcolor{white} & Frontier, Without Price Control & 10 & 1.24 & 0.086 & --- & 0.96 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Frontier, With Price Control & 10 & 1.29 & 0.095 & $-0.040$ & 0.97 \\ \cline{2-7}
+\cellcolor{white} & All, Without Price Control & 166 & 1.33 & 0.099 & --- & 0.53 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & All, With Price Control & 166 & 0.87 & 0.071 & 0.221 & 0.80 \\
+\hline
+
+% ===== SWE-Bench =====
+SWE-Bench & Pareto, Without Price Control & 17 & 1.47 & 0.382 & --- & 0.50 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Pareto, With Price Control & 17 & 1.17 & 0.289 & 0.257 & 0.75 \\ \cline{2-7}
+\cellcolor{white} & Frontier, Without Price Control & 8 & 1.15 & 0.114 & --- & 0.94 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Frontier, With Price Control & 8 & 1.10 & 0.136 & 0.031 & 0.95 \\ \cline{2-7}
+\cellcolor{white} & All, Without Price Control & 31 & 1.50 & 0.276 & --- & 0.50 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & All, With Price Control & 31 & 1.29 & 0.270 & 0.215 & 0.59 \\
+\hline
+
+% ===== AIME =====
+AIME & Pareto, Without Price Control & 52 & 3.32 & 0.383 & --- & 0.60 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Pareto, With Price Control & 52 & 2.31 & 0.237 & 0.563 & 0.88 \\ \cline{2-7}
+\cellcolor{white} & Frontier, Without Price Control & 7 & 2.23 & 0.295 & --- & 0.92 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & Frontier, With Price Control & 7 & 3.29 & 0.623 & $-0.747$ & 0.96 \\ \cline{2-7}
+\cellcolor{white} & All, Without Price Control & 138 & 3.18 & 0.232 & --- & 0.58 \\ \cline{2-7}
+\rowcolor{restrgray} \cellcolor{white} & All, With Price Control & 138 & 2.34 & 0.169 & 0.483 & 0.81 \\
+\hline
+
+\end{tabular}
+\end{table*}

@@ -1,6 +1,6 @@
 # Trends in Evaluation and Inference Efficiency 
 
-Analysis of inference price trends to measure algorithmic progress in language model inference across GPQA-D, AIME, SWE-Bench, and ARC-AGI benchmarks.
+Analysis of inference price trends to measure algorithmic progress in language model inference across GPQA-D, AIME, and SWE-Bench benchmarks.
 
 ## Reproducing All Results
 

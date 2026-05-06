@@ -1,14 +1,17 @@
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.15}
 
-\begin{table*}[t]
+\begin{table}[h!]
 \centering
-\caption{Regression Results (Hardware-Adjusted, $\div 1/0.7$)}
-\label{tab:regression_results_hw_adjusted}
-\renewcommand{\arraystretch}{1.2}
+\caption{Annual reduction factor (hardware-adjusted) and 90\% CI (hardware-adjusted).}
+\label{tab:regression_results_adjusted}
 
+\small
 \begin{tabular}{|l|l|c|c|c|c|}
 \hline
-\textbf{Benchmark} & \textbf{Restriction} & \textbf{Annual Reduction Factor} & \textbf{90\% CI} & \textbf{n} & \textbf{$R^2$} \\
+\textbf{Benchmark} & \textbf{Restriction} &
+\shortstack{\textbf{Annual reduction factor}\\\textbf{(hardware-adjusted)}} &
+\shortstack{\textbf{90\% CI}\\\textbf{(hardware-adjusted)}} &
+\textbf{n} & \textbf{$R^2$} \\
 \hline
 
 % ===== GPQA-Diamond =====
@@ -25,12 +28,12 @@ AIME & Pareto Restricted All License & 6.832 & [2.935, 15.901] & 52 & 0.7413 \\ 
 \rowcolor{restrgray} \cellcolor{white} & Open Weight (no restriction) & 2.269 & [1.073, 4.799] & 66 & 0.6137 \\
 \hline
 
-% ===== SWE\mbox{-}V =====
+% ===== SWE-V =====
 SWE\mbox{-}V & Pareto Restricted All License & 3.925 & [0.579, 26.598] & 17 & 0.5447 \\ \cline{2-6}
-\rowcolor{restrgray} \cellcolor{white} & Pareto Restricted Open Weight & 2.828 & [1.685, 4.747] & 6 & 0.9987 \\ \cline{2-6}
+\rowcolor{restrgray} \cellcolor{white} & Pareto Restricted Open Weight & --- & [---, ---] & --- & --- \\ \cline{2-6}
 \cellcolor{white} & All License (no restriction) & 0.857 & [0.263, 2.797] & 31 & 0.2585 \\ \cline{2-6}
-\rowcolor{restrgray} \cellcolor{white} & Open Weight (no restriction) & 0.011 & [0.000, 0.731] & 9 & 0.5632 \\
+\rowcolor{restrgray} \cellcolor{white} & Open Weight (no restriction) & --- & [---, ---] & --- & --- \\
 \hline
 
 \end{tabular}
-\end{table*}
+\end{table}

@@ -415,6 +415,20 @@ def process_price_history(
             elif "output" in col:
                 date_price_pairs[date_str]["output"] = col
 
+    fallback_input_price_col = (
+        "Input Price\nUSD/1M Tokens"
+        if "Input Price\nUSD/1M Tokens" in df.columns
+        else None
+    )
+    if fallback_input_price_col:
+        for date_str, cols in date_price_pairs.items():
+            if "output" in cols and "input" not in cols:
+                cols["input"] = fallback_input_price_col
+                print(
+                    f"Using '{fallback_input_price_col}' as input-price fallback "
+                    f"for output-only historical date {date_str}."
+                )
+
     # Filter to only complete pairs (both input and output)
     complete_pairs = {
         date: cols
@@ -535,6 +549,9 @@ def process_price_history(
 
             input_price = row.get(input_price_col, np.nan)
             output_price = row.get(output_price_col, np.nan)
+
+            if input_price_col == fallback_input_price_col and pd.isna(output_price):
+                input_price = np.nan
 
             # Strip dollar signs and commas from price strings
             # (older columns are pre-parsed as floats, newer ones may be strings like "$5.00")

@@ -1,4 +1,5 @@
 import os
+import re
 
 os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/matplotlib-cache")
 os.environ.setdefault("XDG_CACHE_HOME", "/private/tmp")
@@ -22,11 +23,18 @@ BENCHMARK_ORDER = ["GPQA-D", "SWE-Bench", "AIME"]
 XTICK_LABELS = ["GPQA-D", "SWE-\nBench", "AIME"]
 
 
-def load_open_license_factors(path=RESULTS_PATH):
+def parse_ci(ci_text):
+    match = re.fullmatch(r"\[\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\]", str(ci_text))
+    if not match:
+        raise ValueError(f"Could not parse CI: {ci_text}")
+    return float(match.group(1)), float(match.group(2))
+
+
+def load_open_license_estimates(path=RESULTS_PATH):
     df = pd.read_csv(path)
     df["Benchmark"] = df["Benchmark"].ffill()
 
-    open_license_factors = {}
+    open_license_estimates = {}
     for _, row in df.iterrows():
         benchmark = str(row["Benchmark"]).strip()
         restriction = str(row["Restriction"]).strip()
@@ -38,18 +46,27 @@ def load_open_license_factors(path=RESULTS_PATH):
         factor = row["Year Decrease Factor"]
         if factor == "N/A":
             continue
-        open_license_factors[BENCHMARK_MAP[benchmark]] = float(factor)
+        open_license_estimates[BENCHMARK_MAP[benchmark]] = {
+            "factor": float(factor),
+            "ci": parse_ci(row["90% CI"]),
+        }
 
-    missing = [bench for bench in BENCHMARK_ORDER if bench not in open_license_factors]
+    missing = [bench for bench in BENCHMARK_ORDER if bench not in open_license_estimates]
     if missing:
-        raise ValueError(f"Missing open-license factors for: {', '.join(missing)}")
+        raise ValueError(f"Missing open-license estimates for: {', '.join(missing)}")
 
-    return open_license_factors
+    return open_license_estimates
 
 
-def compute_algorithmic_progress(open_license_factors):
+def compute_algorithmic_progress(open_license_estimates):
     return {
-        benchmark: open_license_factors[benchmark] / HARDWARE_FACTOR
+        benchmark: {
+            "factor": open_license_estimates[benchmark]["factor"] / HARDWARE_FACTOR,
+            "ci": tuple(
+                endpoint / HARDWARE_FACTOR
+                for endpoint in open_license_estimates[benchmark]["ci"]
+            ),
+        }
         for benchmark in BENCHMARK_ORDER
     }
 
@@ -75,17 +92,31 @@ def plot_algorithmic_progress(algorithmic_progress):
         }
     )
 
-    values = [algorithmic_progress[bench] for bench in BENCHMARK_ORDER]
+    values = [algorithmic_progress[bench]["factor"] for bench in BENCHMARK_ORDER]
+    ci_bounds = [algorithmic_progress[bench]["ci"] for bench in BENCHMARK_ORDER]
+    lower_errors = [value - lower for value, (lower, _) in zip(values, ci_bounds)]
+    upper_errors = [upper - value for value, (_, upper) in zip(values, ci_bounds)]
     x = range(len(BENCHMARK_ORDER))
     color = mpl.colormaps["viridis"](0.5)
 
     fig, ax = plt.subplots(figsize=(3.0, 2.05))
     bars = ax.bar(x, values, color=color, edgecolor="none", width=0.58, zorder=3)
+    ax.errorbar(
+        list(x),
+        values,
+        yerr=[lower_errors, upper_errors],
+        fmt="none",
+        ecolor="#333333",
+        elinewidth=0.8,
+        capsize=2.5,
+        capthick=0.8,
+        zorder=4,
+    )
 
     ax.set_yscale("log")
-    ax.set_ylim(0.9, max(values) * 1.35)
-    ax.set_yticks([1.0, 2.0, 4.0])
-    ax.set_yticklabels(["1x", "2x", "4x"])
+    ax.set_ylim(0.9, max(upper for _, upper in ci_bounds) * 1.25)
+    ax.set_yticks([1.0, 2.0, 4.0, 8.0])
+    ax.set_yticklabels(["1x", "2x", "4x", "8x"])
     ax.yaxis.set_minor_locator(plt.NullLocator())
     ax.yaxis.grid(True, linestyle="-", alpha=0.2, linewidth=0.5, zorder=0)
     ax.set_axisbelow(True)
@@ -100,10 +131,10 @@ def plot_algorithmic_progress(algorithmic_progress):
 
     for bar, value in zip(bars, values):
         ax.text(
-            bar.get_x() + bar.get_width() / 2,
+            bar.get_x() + bar.get_width() / 2 - bar.get_width() * 0.18,
             value * 1.08,
             f"{value:.1f}x",
-            ha="center",
+            ha="right",
             va="bottom",
             fontsize=7,
             fontweight="bold",
@@ -117,10 +148,14 @@ def plot_algorithmic_progress(algorithmic_progress):
 
 
 def main():
-    open_license_factors = load_open_license_factors()
-    algorithmic_progress = compute_algorithmic_progress(open_license_factors)
-    for benchmark, factor in algorithmic_progress.items():
-        print(f"{benchmark}: algorithmic={factor:.3f}x")
+    open_license_estimates = load_open_license_estimates()
+    algorithmic_progress = compute_algorithmic_progress(open_license_estimates)
+    for benchmark, estimate in algorithmic_progress.items():
+        lower, upper = estimate["ci"]
+        print(
+            f"{benchmark}: algorithmic={estimate['factor']:.3f}x "
+            f"(90% CI [{lower:.3f}, {upper:.3f}])"
+        )
     plot_algorithmic_progress(algorithmic_progress)
 
 

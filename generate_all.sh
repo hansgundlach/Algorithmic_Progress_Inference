@@ -34,6 +34,7 @@ fi
 # ──────────────────────────────────────────────
 echo "=== Step 2: Generating regression comparison tables ==="
 python3 generate_regression_tables.py
+python3 format_paper_tables.py
 echo ""
 
 # ──────────────────────────────────────────────

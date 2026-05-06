@@ -223,6 +223,11 @@ def plot_multi_benchmark_price_comparison(
         ax.set_xlim(right=x_max + (x_max - x_min) * 0.12)
 
     # Axes
+    ax.set_title(
+        "Trends in Price of Frontier Evaluation Performance",
+        fontsize=FONT_SIZE_TITLE,
+        pad=6,
+    )
     ax.set_xlabel("Release Date", fontsize=FONT_SIZE_LABEL)
     ax.set_ylabel("Benchmark Cost (USD)", fontsize=FONT_SIZE_LABEL)
     ax.set_yscale("log")
