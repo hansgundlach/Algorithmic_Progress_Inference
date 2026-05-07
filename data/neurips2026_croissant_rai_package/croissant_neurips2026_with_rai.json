@@ -1,0 +1,1906 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "personalSensitiveInformation": "cr:personalSensitiveInformation",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "examples": "cr:examples",
+    "samplingRate": "cr:samplingRate",
+    "equivalentProperty": "cr:equivalentProperty"
+  },
+  "@type": "sc:Dataset",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "repo",
+      "name": "repo",
+      "description": "The Hugging Face git repository.",
+      "contentUrl": "https://huggingface.co/datasets/anonymous-noname/econ_eval/tree/refs%2Fconvert%2Fparquet",
+      "encodingFormat": "git+https",
+      "sha256": "https://github.com/mlcommons/croissant/issues/80"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "parquet-files-for-config-default",
+      "containedIn": {
+        "@id": "repo"
+      },
+      "encodingFormat": "application/x-parquet",
+      "includes": "default/*/*.parquet"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "dataType": "cr:Split",
+      "key": {
+        "@id": "default_splits/split_name"
+      },
+      "@id": "default_splits",
+      "name": "default_splits",
+      "description": "Splits for the default config.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "default_splits/split_name",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "default_splits/split_name": "test"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "default",
+      "description": "anonymous-noname/econ_eval - 'default' subset",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "default/split",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "fileProperty": "fullpath"
+            },
+            "transform": {
+              "regex": "default/(?:partial-)?(test)/.+parquet$"
+            }
+          },
+          "references": {
+            "field": {
+              "@id": "default_splits/split_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Model",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Model"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Model_Slug",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Model Slug"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Creator",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Creator"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/License",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "License"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Context___Window",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Context\r\n Window"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Artificial_Analysis___Intelligence_Index",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Artificial Analysis\r\n Intelligence Index"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/MMLU-Pro__Reasoning___Knowledge_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "MMLU-Pro (Reasoning & Knowledge)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/GPQA_Diamond__Scientific_Reasoning_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "GPQA Diamond (Scientific Reasoning)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Humanity_s_Last_Exam__Reasoning___Knowledge_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Humanity's Last Exam (Reasoning & Knowledge)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/LiveCodeBench__Coding_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "LiveCodeBench (Coding)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/SciCode__Coding_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "SciCode (Coding)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/HumanEval__Coding_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "HumanEval (Coding)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/MATH-500__Quantitative_Reasoning_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "MATH-500 (Quantitative Reasoning)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/AIME_2024__Competition_Math_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "AIME 2024 (Competition Math)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Multilingual_Index__Artificial_Analysis_",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Multilingual Index (Artificial Analysis)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Chatbot_Arena",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Chatbot Arena"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/IFBench",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "IFBench"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/LCR",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "LCR"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Terminal-Bench_Hard",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Terminal-Bench Hard"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/___-Bench_Telecom",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "___-Bench Telecom"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Median___Tokens_s",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Median\r\n Tokens/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P5___Tokens_s",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P5\r\n Tokens/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P25___Tokens_s",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P25\r\n Tokens/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P75___Tokens_s",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P75\r\n Tokens/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P95___Tokens_s",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P95\r\n Tokens/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Median___First_Chunk__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Median\r\n First Chunk (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/First_Answer___Token__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "First Answer\r\n Token (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P5___First_Chunk__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P5\r\n First Chunk (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P25___First_Chunk__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P25\r\n First Chunk (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P75___First_Chunk__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P75\r\n First Chunk (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/P95___First_Chunk__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "P95\r\n First Chunk (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Total___Response__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Total\r\n Response (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Reasoning___Time__s_",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Reasoning\r\n Time (s)"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Reasoning_TF",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Reasoning_TF"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Further___Analysis",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Further\r\n Analysis"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Release_Date",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Release Date"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Parameters",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Parameters"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Known_Active_Parameters",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Known Active Parameters"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Latency",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Latency"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/token_s",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "token/s"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Chinese",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Chinese"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Notes",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Notes"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/input_tokens_epoch_gpqa",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "input_tokens_epoch_gpqa"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/output_tokens_epoch_gpqa",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "output_tokens_epoch_gpqa"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/epoch_gpqa",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "epoch_gpqa"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/gpqa_epochs",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "gpqa_epochs"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_read_gpqa",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_read_gpqa"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_output_gpqa",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_output_gpqa"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/gpqa_reasoning_tokens",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "gpqa_reasoning_tokens"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/gpqa_reasoning_in_output",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "gpqa_reasoning_in_output"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/total_tokens__",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "total_tokens_?"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Notes_GPQA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Notes GPQA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/inspect_download_link_GPQA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "inspect_download_link_GPQA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/inspect_log_GPQA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "inspect log GPQA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/input_tokens_swe",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "input tokens swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/output_tokens_swe",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "output tokens swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_reads_swe",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache reads swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_write_swe",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache write swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_in_input",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_in_input"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_in_output",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_in_output"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/reasoning_swe",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "reasoning swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/reasoning_in_output_swe",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "reasoning_in_output_swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/epoch_swe",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "epoch_swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/inspect_download_link_swe",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "inspect_download_link_swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/swe_inspect_log",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "swe_inspect_log"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/notes_swe",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "notes swe"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Unnamed__66",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "Unnamed: 66"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/input_tokens_AIME",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "input tokens AIME"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/output_tokens_AIME",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "output tokens AIME"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/AIME_reasoning",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "AIME_reasoning"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/reasoning_in_output",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "reasoning_in_output"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/AIME_epochs",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "AIME_epochs"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_reads_AIME",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache reads AIME"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/epoch_AIME_16",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "epoch_AIME_16"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/oneshot_AIME",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "oneshot_AIME"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/grader_tokens_input",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "grader_tokens_input"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/grader_tokens_output",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "grader_tokens_output"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/notes_grader_model",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "notes/grader model"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/AIME_log_download",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "AIME_log_download"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/AIME_inspect_log",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "AIME_inspect_log"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_read_cost",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_read_cost"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/cache_write_cost",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "cache_write_cost"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/5_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "5/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/5_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "5/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/6_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "6/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/6_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "6/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/7_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "7/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/7_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "7/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/8_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "8/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/8_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "8/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/9_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "9/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/9_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "9/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/10_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "10/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/10_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "10/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/11_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "11/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/11_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "11/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/12_1_2024_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "12/1/2024 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/12_1_2024_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "12/1/2024 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/1_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "1/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/1_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "1/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/2_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "2/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/2_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "2/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/3_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "3/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/3_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "3/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/5_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "5/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/5_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "5/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/6_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "6/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/6_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "6/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/7_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "7/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/7_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "7/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/8_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "8/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/8_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "8/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/9_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "9/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/9_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "9/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/10_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "10/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/10_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "10/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/11_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "11/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/11_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "11/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/12_1_2025_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "12/1/2025 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/12_1_2025_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "12/1/2025 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/1_1_2026_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "1/1/2026 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/1_1_2026_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "1/1/2026 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/2_1_2026_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "2/1/2026 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/2_1_2026_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "2/1/2026 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/3_1_2026_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "3/1/2026 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/3_1_2026_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "3/1/2026 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2026_input_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2026 input price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/4_1_2026_output_price",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "4/1/2026 output price"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/pricing_notes",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "pricing notes"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "conformsTo": "http://mlcommons.org/croissant/1.1",
+  "name": "econ_eval",
+  "description": "# Cost-Aware Benchmark Price Dataset\n\nThis dataset links model benchmark performance, historical inference prices, and benchmark token usage to estimate the cost of running frontier language model benchmarks over time.\n\n## Contents\n\nThe dataset contains 342 model-price observations covering model metadata, benchmark scores, historical Artificial Analysis prices, Epoch AI benchmark token usage, and derived benchmark-cost estimates.\n\n## Main fields\n\n- `Model`: model name\n- `Model Slug`: normalized model identifier\n- `Creator`: model creator or provider\n- `License`: open/proprietary status\n- `GPQA Diamond (Scientific Reasoning)`: benchmark score\n- `AIME 2024 (Competition Math)`: benchmark score\n- `input_tokens_epoch_gpqa`, `output_tokens_epoch_gpqa`: Epoch AI token usage for GPQA-Diamond\n- `input tokens swe`, `output tokens swe`: Epoch AI token usage for SWE-bench Verified\n- `oneshot_AIME`, `epoch_gpqa`, `epoch_swe`: Epoch AI's measured benchmark scores\n- monthly price columns: historical input/output prices from Artificial Analysis snapshots\n- derived cost columns: estimated benchmark-level inference costs computed from token usage and historical prices\n\n## Sources\n\nBenchmark scores and token-usage data are derived from the Epoch AI Benchmarking Hub. Historical input and output token prices are collected from Artificial Analysis snapshots via the Internet Archive. Cache-token prices, where used, are collected from model-provider pricing pages.\n\n## Intended use\n\nThe dataset is intended for cost-aware analysis of language model evaluation, including estimating price-performance trends over time, benchmark cost at fixed performance, frontier benchmark costs, progress under fixed inference budgets, and diffusion of benchmark capabilities across the model ecosystem.\n\n## License and upstream terms\n\nThis dataset combines author-created derived fields with upstream benchmark and pricing data. Author-created metadata, cleaning decisions, derived variables, and documentation are released under CC BY 4.0. Analysis code is released separately under the MIT license. Epoch AI Benchmarking Hub data is used under CC BY 4.0 with attribution to Epoch AI. Artificial Analysis price data is attributed to Artificial Analysis. The authors do not claim ownership of Artificial Analysis source fields or relicense them. Artificial Analysis-derived fields remain subject to Artificial Analysis's applicable terms and policies. Users should attribute both this dataset and the relevant upstream sources when using the data.\n\n## Limitations\n\nThe dataset does not measure provider marginal costs, private negotiated prices, training costs, latency-adjusted costs, or causal effects of architecture or licensing. Some historical prices are missing because archived pages were unavailable or incomplete. Cache-token prices are only partially observed historically. Some benchmark/model combinations have limited coverage, especially for open-weight models on SWE-bench Verified.\n\n## Reproducibility\n\nThe accompanying code repository contains scripts to reproduce the paper's main tables and figures from this dataset. The dataset analysis can be run in several minutes on a personal computer.\n\n## Citation\n\nIf you use this dataset, please cite the accompanying paper and attribute the upstream data sources: Epoch AI Benchmarking Hub and Artificial Analysis.\n",
+  "alternateName": [
+    "anonymous-noname/econ_eval",
+    "Cost-Aware Benchmark Price Dataset"
+  ],
+  "creator": {
+    "@type": "Person",
+    "name": "anonymous",
+    "url": "https://huggingface.co/anonymous-noname"
+  },
+  "keywords": [
+    "other",
+    "< 1K",
+    "csv",
+    "Tabular",
+    "Text",
+    "Datasets",
+    "pandas",
+    "Polars",
+    "Croissant",
+    "🇺🇸 Region: US",
+    "llm",
+    "benchmarking",
+    "evaluation",
+    "inference-cost",
+    "price-performance",
+    "ai-progress"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "url": "https://huggingface.co/datasets/anonymous-noname/econ_eval",
+  "dct:conformsTo": "http://mlcommons.org/croissant/RAI/1.0",
+  "version": "1.0.0",
+  "datePublished": "2026-05-06",
+  "citeAs": "Please cite the accompanying NeurIPS 2026 Evaluations and Datasets submission, The Price of Progress: Revisiting Benchmark Progress in AI, and attribute the upstream sources: Epoch AI Benchmarking Hub and Artificial Analysis.",
+  "codeRepository": "https://anonymous.4open.science/r/Algorithmic_Progress_Inference-C8CD/README.md",
+  "usageInfo": "Author-created metadata, cleaning decisions, derived variables, and documentation are released under CC BY 4.0. Epoch AI Benchmarking Hub data is used under CC BY 4.0 with attribution to Epoch AI. Artificial Analysis price data is attributed to Artificial Analysis and remains subject to Artificial Analysis's applicable terms and policies; the authors do not claim ownership of Artificial Analysis source fields or relicense them.",
+  "rai:dataLimitations": "This dataset is limited to model/benchmark combinations for which benchmark scores, token-usage metadata, and historical price information could be matched. Coverage is concentrated on GPQA-Diamond, SWE-bench Verified, and OTIS Mock AIME 2024-2025 over approximately April 2024 to April 2026. It is not a comprehensive database of all language models, all benchmarks, all providers, all negotiated prices, or all deployment conditions. The price series uses observable user-facing token prices, often the lowest observed provider price, rather than provider marginal cost or enterprise/private contract pricing. Historical Artificial Analysis snapshots are incomplete because archived pages were sometimes unavailable or incomplete. Cache-token prices are only partially observed historically; where cache prices are used, they may rely on current provider pricing rather than a full historical cache-price series. Some benchmark/model combinations have sparse coverage, especially SWE-bench Verified and open-weight subsets. The dataset should not be used to infer causal effects of architecture, licensing, or provider strategy without additional assumptions, nor should it be used as a live pricing source, procurement guide, or measure of model performance outside the documented benchmarks.",
+  "rai:dataBiases": "The dataset inherits selection and measurement biases from its upstream sources. Models are overrepresented when they appear in Epoch AI benchmark data and/or Artificial Analysis pricing snapshots, so frontier, English-language, popular, and commercially visible models are likely better covered than smaller, regional, private, or less-publicized systems. The benchmark suite emphasizes reasoning, scientific knowledge, competition mathematics, and software engineering; it does not directly measure safety, fairness, multilingual robustness, privacy behavior, domain-specialist reliability outside these tasks, or real-world user satisfaction. Using lowest observable provider prices may bias estimates toward a lower-bound cost frontier and may understate costs faced by users who prioritize latency, uptime, privacy guarantees, support, rate limits, or first-party APIs. Archived web data can introduce temporal gaps and survivorship bias, and model/provider naming mismatches can exclude cases that could not be confidently matched.",
+  "rai:personalSensitiveInformation": "The dataset is not a human-subjects dataset and does not intentionally contain individual-level personal, demographic, health, political, religious, biometric, or socioeconomic information. Rows describe AI models, providers/creators, benchmark scores, token usage, prices, and derived benchmark-cost estimates. The 'Creator' and related fields refer to public model creators or provider organizations, not private individuals. No sensitive attributes about people are intended to be included.",
+  "rai:dataUseCases": "Intended uses include cost-aware analysis of language model evaluation, estimating historical price-performance trends, estimating benchmark-level inference costs, studying benchmark capability diffusion, reproducing the accompanying paper's tables and figures, and informing discussions about benchmark resource transparency. The dataset is valid for the specific documented benchmarks and price sources, subject to the limitations described here and in the accompanying paper. It has not been validated for training or fine-tuning models, ranking models for all deployment settings, measuring live/current prices, estimating provider marginal costs, estimating enterprise procurement costs, measuring latency-adjusted utility, evaluating safety or fairness, or making claims about capabilities outside the included benchmarks.",
+  "rai:dataSocialImpact": "Potential positive impacts include improving transparency about the economic cost of AI evaluation, helping researchers compare benchmark progress per dollar, lowering barriers for researchers planning evaluation budgets, and encouraging evaluators to publish token usage and price/resource metadata alongside benchmark scores. Potential negative impacts include overemphasis on benchmark scores and prices at the expense of safety, reliability, privacy, latency, accessibility, or domain-specific quality; reinforcing visibility biases toward models already tracked by major benchmarking/pricing platforms; and enabling superficial cost-based rankings that ignore deployment context. The release mitigates these risks by documenting sources, scope, limitations, upstream attribution, and reproducibility code, and by discouraging use as a live pricing or general-purpose model ranking source.",
+  "rai:hasSyntheticData": false,
+  "prov:wasDerivedFrom": [
+    "https://epoch.ai/benchmarks/use-this-data/",
+    "https://artificialanalysis.ai/",
+    "https://web.archive.org/",
+    "Model-provider pricing pages for cache-token prices where used"
+  ],
+  "prov:wasGeneratedBy": "The dataset was generated by collecting historical input and output token price snapshots from Artificial Analysis via the Internet Archive, supplementing these with benchmark scores and benchmark token-usage metadata from Epoch AI's Benchmarking Hub, and adding cache-token prices from model-provider pricing pages where needed. The authors matched model names between upstream benchmark and pricing sources, excluded zero-token-cost promotional datapoints, excluded datapoints that could not be confidently matched or whose benchmark reports were underspecified, normalized multi-run benchmark token counts to one run when only aggregate token totals were available, and computed benchmark-level inference costs by multiplying relevant token counts by corresponding historical token prices. Prices of running a benchmark may change over time and are treated as separate model-price observations. The accompanying repository contains scripts to reproduce the main tables and figures from the released dataset."
+}
