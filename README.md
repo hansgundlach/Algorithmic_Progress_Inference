@@ -26,6 +26,8 @@ Use `--skip-csv` to skip step 1 if source data hasn't changed.
   - `data/gpqa_price_reduction_models.csv`
   - `data/aime_price_reduction_models.csv`
   - `data/swe_price_reduction_models.csv`
+- `combine_benchmark_price_data.py` — combines the generated GPQA-Diamond, AIME, and SWE-Bench Verified price-reduction CSVs into:
+  - `data/combined_benchmark_price_reduction_models.csv`
 - `generate_regression_tables.py` — runs regressions across all benchmark/restriction combos, outputs to `results_data/`:
   - `regression_comparison_table_raw.csv` — raw annual cost reduction factors
   - `regression_comparison_table_hw_adjusted.csv` — adjusted for hardware progress (divided by 1/0.7)

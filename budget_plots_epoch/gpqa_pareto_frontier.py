@@ -164,7 +164,7 @@ def main():
     # Frontier slope label: (x_offset, y_offset) in points from arrow target
     FRONTIER_SLOPE_OFFSET = (-80, -10)
     # Price-controlled slope label: (x_offset, y_offset) in points from arrow target
-    PRICE_SLOPE_OFFSET = (50, -25)
+    PRICE_SLOPE_OFFSET = (80, 0)
     # Position along trend line (0.0 = start, 1.0 = end)
     SLOPE_ANNO_POSITION = 0.65
 

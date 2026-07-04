@@ -355,16 +355,46 @@ def main():
     # INLINE LABELS (Epoch AI style - labels at end of lines)
     # =========================================================================
 
-    # Sort line_data by end_score to avoid overlap, then add labels
+    # Sort line_data by end_score (descending) so we stack from top to bottom
     line_data_sorted = sorted(line_data, key=lambda x: x["end_score"], reverse=True)
 
+    # Compute a minimum vertical separation between labels in data units so
+    # labels with nearly identical end_scores (e.g. $1 and $10) don't collide.
+    y_min, y_max = ax.get_ylim()
+    MIN_DATA_SEP = (y_max - y_min) * 0.045  # ~4.5% of current y-range
+
+    # Greedy top-down stacking: each label is placed at its natural end_score,
+    # but pushed down if it would be too close to the previous label above it.
+    line_data_sorted[0]["label_y"] = line_data_sorted[0]["end_score"]
+    for i in range(1, len(line_data_sorted)):
+        prev_y = line_data_sorted[i - 1]["label_y"]
+        natural_y = line_data_sorted[i]["end_score"]
+        if natural_y > prev_y - MIN_DATA_SEP:
+            line_data_sorted[i]["label_y"] = prev_y - MIN_DATA_SEP
+        else:
+            line_data_sorted[i]["label_y"] = natural_y
+
     for item in line_data_sorted:
-        # Adjust vertical offset for $10 label to avoid overlap
-        vertical_offset = -8 if item["label"] == "$10" else 0
+        # Draw a thin connector from the line's actual endpoint to the label
+        # when we had to shift the label vertically, so the association is clear.
+        if abs(item["label_y"] - item["end_score"]) > 1e-9:
+            ax.annotate(
+                "",
+                xy=(item["end_date"], item["end_score"]),
+                xytext=(item["end_date"], item["label_y"]),
+                arrowprops=dict(
+                    arrowstyle="-",
+                    color=item["color"],
+                    linewidth=1.0,
+                    alpha=0.6,
+                ),
+                zorder=4,
+            )
+
         ax.annotate(
             item["label"],
-            xy=(item["end_date"], item["end_score"]),
-            xytext=(12, vertical_offset),
+            xy=(item["end_date"], item["label_y"]),
+            xytext=(12, 0),
             textcoords="offset points",
             fontsize=LABEL_FONTSIZE,
             fontweight="bold",

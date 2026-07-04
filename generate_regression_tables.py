@@ -580,6 +580,43 @@ def write_table1_styled_latex(table_df: pd.DataFrame, path: str, caption: str, l
     print(f"Saved {path}")
 
 
+def validate_table1_required_rows(table_df: pd.DataFrame) -> None:
+    """Fail loudly if key Table 1 rows are missing despite available data."""
+    df = table_df.copy()
+    df["Benchmark"] = df["Benchmark"].replace("", np.nan).ffill()
+
+    required_rows = [
+        ("SWE-Bench", "Pareto Restricted Open License"),
+        ("SWE-Bench", "Open License (no restriction)"),
+    ]
+
+    failures = []
+    for benchmark, restriction in required_rows:
+        match = df[
+            (df["Benchmark"] == benchmark)
+            & (df["Restriction"] == restriction)
+        ]
+        if match.empty:
+            failures.append(f"{benchmark} / {restriction}: row missing")
+            continue
+
+        row = match.iloc[0]
+        if (
+            _is_missing(row.get("Year Decrease Factor"))
+            or _is_missing(row.get("90% CI"))
+            or _is_missing(row.get("n"))
+            or float(row.get("n", 0)) <= 0
+        ):
+            failures.append(f"{benchmark} / {restriction}: row has placeholder values")
+
+    if failures:
+        details = "\n  - ".join(failures)
+        raise ValueError(
+            "Required regression table rows are missing or empty:\n"
+            f"  - {details}"
+        )
+
+
 # ---------------------------------------------------------------------------
 # Table 2: logit(score) ~ time [+ log(price)] across Pareto / Frontier / All
 # ---------------------------------------------------------------------------
@@ -936,6 +973,7 @@ if __name__ == "__main__":
         df_gpqa, df_aime, df_swe,
         hardware_gain_factor=1.0,
     )
+    validate_table1_required_rows(table_raw)
     print("\n")
     print(table_raw.to_string(index=False))
 
@@ -959,6 +997,7 @@ if __name__ == "__main__":
         df_gpqa, df_aime, df_swe,
         hardware_gain_factor=(1 / 0.7),
     )
+    validate_table1_required_rows(table_hw)
     print("\n")
     print(table_hw.to_string(index=False))
 

@@ -20,7 +20,8 @@ TABLE1_CAPTION = (
     "regression approach. Regressions include either all models or only the "
     "models that improve in accuracy or price (Pareto Restricted). A separate "
     "analysis of only open weight models was possible with GPQA-Diamond "
-    "(GPQA-Diamond) and OTIS-MOCK AIME 2024-2025 (AIME). Decrease factors "
+    "(GPQA-Diamond), OTIS-MOCK AIME 2024-2025 (AIME), and SWE-Bench "
+    "Verified (SWE-V). Decrease factors "
     "$<1$ represent increases."
 )
 TABLE2_CAPTION = (
@@ -133,7 +134,7 @@ def parse_ci(ci_text):
         return None
     if not (math.isfinite(lower) and math.isfinite(upper)):
         return None
-    if lower <= 0 or upper <= 0 or upper < lower:
+    if lower < 0 or upper <= 0 or upper < lower:
         return None
     if upper > 1000:
         return None
@@ -205,10 +206,7 @@ def render_table1(
             factor = ci = n = r2 = "---"
             ci = "[---, ---]"
 
-            suppress_sparse_open_weight = (
-                benchmark == "SWE-Bench" and "Open License" in restriction
-            )
-            if row and not suppress_sparse_open_weight:
+            if row:
                 parsed_ci = parse_ci(row.get("90% CI", ""))
                 raw_factor = fmt_float(row.get("Year Decrease Factor", ""), 12)
                 if parsed_ci and raw_factor != "---":

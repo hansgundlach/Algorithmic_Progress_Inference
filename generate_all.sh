@@ -26,6 +26,7 @@ done
 if [ "$SKIP_CSV" = false ]; then
     echo "=== Step 1: Generating benchmark CSVs ==="
     python3 generate_new_csv.py
+    python3 combine_benchmark_price_data.py
     echo ""
 fi
 

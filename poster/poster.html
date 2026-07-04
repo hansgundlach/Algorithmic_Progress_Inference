@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ICML 2026 Poster — Quantum Deep Learning Still Needs a Quantum Leap</title>
+<style>
+  :root{
+    --blue:#1f77b4;
+    --blue-deep:#0b3a63;
+    --blue-ink:#0a2742;
+    --orange:#ef8a17;
+    --orange-soft:#fff3e3;
+    --blue-soft:#eaf3fb;
+    --ink:#14202e;
+    --muted:#5a6a78;
+    --line:#cdd9e4;
+    --panel:#f6f9fc;
+    --white:#ffffff;
+  }
+
+  @page { size: 48in 36in; margin:0; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ font-family:"Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+
+  .poster{
+    width:48in; height:36in; overflow:hidden;
+    background:var(--white);
+    padding:0.55in 0.6in 0.5in 0.6in;
+    display:flex; flex-direction:column;
+  }
+
+  /* ---------- HEADER ---------- */
+  .header{
+    display:grid;
+    grid-template-columns: 4.6in 1fr 6.6in;
+    gap:0.5in; align-items:center;
+    background:linear-gradient(100deg,var(--blue-ink) 0%, var(--blue-deep) 60%, #12568f 100%);
+    color:#fff; border-radius:0.22in;
+    padding:0.42in 0.55in;
+    box-shadow:0 0.04in 0.18in rgba(11,58,99,0.25);
+  }
+  .header .bartop{ height:0; }
+  .title-block{ text-align:center; }
+  .kicker{
+    font-size:21pt; letter-spacing:0.06em; text-transform:uppercase;
+    color:#bfe0ff; font-weight:700; margin-bottom:0.10in;
+  }
+  .kicker .pos{ color:var(--orange); }
+  h1{
+    font-size:64pt; line-height:1.02; margin:0 0 0.14in 0; font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .authors{ font-size:30pt; font-weight:600; margin:0.05in 0 0.06in; color:#eaf3fb; }
+  .authors sup{ color:var(--orange); font-size:0.62em; }
+  .affil{ font-size:18.5pt; color:#bcd4e8; margin:0; }
+
+  /* logo + ICML badge cells */
+  .logo-cell{ display:flex; align-items:center; justify-content:flex-start; }
+  .logo-box{
+    width:100%; height:2.5in; border:0.03in dashed rgba(255,255,255,0.55);
+    border-radius:0.16in; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:0.05in;
+    background:rgba(255,255,255,0.06);
+  }
+  .logo-box .lg-main{ font-size:30pt; font-weight:800; color:#fff; letter-spacing:0.01em; }
+  .logo-box .lg-sub{ font-size:15pt; color:#bcd4e8; letter-spacing:0.16em; text-transform:uppercase; }
+  .logo-box .lg-tag{ font-size:12.5pt; color:#9fc0dc; font-style:italic; }
+
+  .right-cell{ display:flex; align-items:center; gap:0.42in; justify-content:flex-end; }
+  .icml-badge{
+    text-align:center; background:#fff; color:var(--blue-ink);
+    border-radius:0.16in; padding:0.20in 0.30in; min-width:3.0in;
+    border:0.035in solid var(--orange);
+  }
+  .icml-badge .ic-conf{ font-size:18pt; font-weight:800; color:var(--orange); letter-spacing:0.02em; }
+  .icml-badge .ic-icml{ font-size:46pt; font-weight:900; line-height:1; color:var(--blue-ink); }
+  .icml-badge .ic-year{ font-size:46pt; font-weight:900; line-height:1; color:var(--blue); }
+  .icml-badge .ic-where{ font-size:13.5pt; color:var(--muted); margin-top:0.05in; }
+  .qr-cell{ text-align:center; }
+  .qr-cell img{ width:1.9in; height:1.9in; display:block; background:#fff; border-radius:0.08in; }
+  .qr-cell .qr-cap{ font-size:14pt; color:#dbeafc; margin-top:0.06in; font-weight:600; }
+  .qr-cell .qr-cap b{ color:#fff; }
+
+  /* ---------- BODY GRID ---------- */
+  .body{
+    flex:1; display:grid; grid-template-columns:repeat(3,1fr);
+    gap:0.5in; margin-top:0.45in; min-height:0;
+  }
+  .col{ display:flex; flex-direction:column; gap:0.42in; min-height:0; }
+
+  .card{
+    background:var(--white); border:0.022in solid var(--line);
+    border-radius:0.18in; padding:0.34in 0.38in 0.36in;
+    box-shadow:0 0.02in 0.10in rgba(20,40,60,0.05);
+  }
+  .card.tinted{ background:var(--panel); }
+  .card.accent{
+    background:linear-gradient(180deg,#0e4977 0%, #0b3a63 100%);
+    color:#fff; border:none;
+  }
+  .card.accent h2{ color:#fff; }
+  .card.accent h2::after{ background:var(--orange); }
+
+  h2{
+    font-size:32pt; font-weight:800; margin:0 0 0.20in 0; color:var(--blue-ink);
+    line-height:1.05; position:relative; padding-bottom:0.12in;
+  }
+  h2::after{
+    content:""; position:absolute; left:0; bottom:0;
+    width:1.5in; height:0.055in; background:var(--orange); border-radius:0.03in;
+  }
+  h2 .num{
+    display:inline-block; background:var(--orange); color:#fff;
+    font-size:21pt; font-weight:800; border-radius:0.5in;
+    width:0.62in; height:0.62in; line-height:0.62in; text-align:center;
+    margin-right:0.14in; vertical-align:0.02in;
+  }
+
+  p,li{ font-size:21.5pt; line-height:1.38; margin:0 0 0.14in; }
+  .card.accent p, .card.accent li{ color:#eaf3fb; }
+  strong{ color:var(--blue-deep); }
+  .card.accent strong{ color:#ffd9a6; }
+  em{ color:var(--orange); font-style:normal; font-weight:700; }
+
+  ul{ margin:0; padding-left:0.34in; }
+  li{ margin-bottom:0.13in; }
+  li::marker{ color:var(--orange); }
+
+  /* big position statement */
+  .position{
+    background:var(--orange-soft); border-left:0.10in solid var(--orange);
+    border-radius:0.12in; padding:0.30in 0.34in;
+  }
+  .position .lab{
+    font-size:17pt; text-transform:uppercase; letter-spacing:0.10em;
+    color:var(--orange); font-weight:800; margin-bottom:0.10in;
+  }
+  .position p{ font-size:26pt; line-height:1.3; font-weight:600; color:var(--blue-ink); margin:0; }
+  .position p em{ color:var(--orange); }
+
+  /* figures */
+  .fig{ text-align:center; }
+  .fig img{ width:100%; border:0.022in solid var(--line); border-radius:0.10in; background:#fff; }
+  .fig.f2 img{ width:84%; }
+  .figcap{ font-size:16.5pt; color:var(--muted); margin-top:0.12in; line-height:1.3; text-align:left; }
+  .figcap b{ color:var(--blue-deep); }
+
+  /* table */
+  table{ width:100%; border-collapse:collapse; font-size:17pt; }
+  th,td{ text-align:left; padding:0.13in 0.14in; vertical-align:top; line-height:1.22; }
+  thead th{
+    background:var(--blue-ink); color:#fff; font-size:16.5pt;
+    text-transform:uppercase; letter-spacing:0.03em; font-weight:800;
+  }
+  tbody tr:nth-child(even){ background:var(--blue-soft); }
+  tbody td:first-child{ font-weight:700; color:var(--blue-deep); }
+  .pill{
+    display:inline-block; font-size:14.5pt; font-weight:800; color:#fff;
+    border-radius:0.4in; padding:0.04in 0.16in; white-space:nowrap;
+  }
+  .pill.exp{ background:#2e9e5b; }
+  .pill.quad{ background:#e0731a; }
+  .pill.poly{ background:#c0392b; }
+  .pill.mix{ background:#7a5cc0; }
+  .pill.unc{ background:#6b7785; }
+
+  /* roadblock items */
+  .road{ display:flex; gap:0.22in; margin-bottom:0.20in; align-items:flex-start; }
+  .road:last-child{ margin-bottom:0; }
+  .road .rn{
+    flex:0 0 auto; width:0.78in; height:0.78in; border-radius:0.14in;
+    background:var(--blue); color:#fff; font-size:30pt; font-weight:900;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .road .rt{ font-size:20pt; line-height:1.32; }
+  .road .rt b{ color:var(--blue-deep); font-size:21pt; }
+
+  .footer{
+    margin-top:0.34in; border-top:0.03in solid var(--line);
+    padding-top:0.16in; display:flex; justify-content:space-between;
+    align-items:center; font-size:16.5pt; color:var(--muted);
+  }
+  .footer b{ color:var(--blue-deep); }
+  .footer .cite{ font-style:italic; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- ================= HEADER ================= -->
+  <div class="header">
+    <div class="logo-cell">
+      <div class="logo-box">
+        <div class="lg-main">MIT&nbsp;FutureTech</div>
+        <div class="lg-sub">CSAIL&nbsp;&middot;&nbsp;MIT</div>
+        <div class="lg-tag">[ replace with group logo ]</div>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <div class="kicker"><span class="pos">Position</span> &nbsp;&bull;&nbsp; ICML 2026 Main Track</div>
+      <h1>Quantum Deep Learning Still<br>Needs a Quantum Leap</h1>
+      <p class="authors">Hans Gundlach<sup>1</sup>&nbsp;&nbsp; Hrvoje Kukina<sup>2</sup>&nbsp;&nbsp; Jayson Lynch<sup>1</sup>&nbsp;&nbsp; Neil Thompson<sup>1</sup></p>
+      <p class="affil"><sup>1</sup>MIT FutureTech, CSAIL, Cambridge MA, USA &nbsp;&nbsp;|&nbsp;&nbsp; <sup>2</sup>TU Wien, Vienna, Austria</p>
+    </div>
+
+    <div class="right-cell">
+      <div class="icml-badge">
+        <div class="ic-conf">Forty-Third International Conference on Machine Learning</div>
+        <div><span class="ic-icml">ICML</span> <span class="ic-year">2026</span></div>
+        <div class="ic-where">Seoul, South Korea &middot; PMLR 306</div>
+      </div>
+      <div class="qr-cell">
+        <img src="figs/qr_arxiv.png" alt="arXiv QR">
+        <div class="qr-cap"><b>Read the paper</b><br>arXiv:2511.01253</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BODY ================= -->
+  <div class="body">
+
+    <!-- ---------- COLUMN 1 ---------- -->
+    <div class="col">
+      <div class="card">
+        <div class="position">
+          <div class="lab">Our Position</div>
+          <p>Even accounting for rapid hardware progress, quantum computers will need a <em>quantum leap</em> &mdash; not just steady improvement &mdash; to meaningfully accelerate deep learning over the next <em>10&ndash;20 years</em>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Why Ask Now?</h2>
+        <p>Deep learning's progress tracks <strong>compute</strong> &mdash; the &ldquo;bitter lesson.&rdquo; As classical hardware nears its limits, it is natural to ask whether <strong>quantum hardware</strong> could drive the next paradigm shift, as GPUs once did.</p>
+        <p>We present a <strong>first-of-its-kind survey</strong> mapping quantum algorithms onto every stage of the deep-learning pipeline, paired with <strong>quantitative economic-advantage forecasts</strong> built on real quantum hardware trends.</p>
+        <p>The verdict: today's promising speedups are blocked by overhead, missing memory, or apply only to narrow special cases.</p>
+      </div>
+
+      <div class="card tinted fig">
+        <img src="figs/fig1_qea.png" alt="Quantum Economic Advantage threshold">
+        <div class="figcap"><b>Fig 1 &middot; Quantum Economic Advantage (QEA).</b> Quantum gains are asymptotic but carry a huge constant hardware overhead. A problem pays off on quantum only beyond a critical threshold <b>N*</b> &mdash; below it, classical is faster.</div>
+      </div>
+
+      <div class="card accent">
+        <h2>The QEA Model</h2>
+        <p>We extend the Quantum Economic Advantage framework of <strong>Choi et&nbsp;al. (2023)</strong>. Quantum devices have asymptotic advantages but enormous constants:</p>
+        <ul>
+          <li><strong>~10<sup>13</sup>&times;</strong> slower gate speed vs. a floating-point op</li>
+          <li><strong>~10<sup>2</sup>&times;</strong> overhead from quantum error correction</li>
+          <li><strong>~10<sup>8</sup>&times;</strong> more GPU parallelism per dollar classically</li>
+        </ul>
+        <p>We forecast how <strong>qubit counts, gate speeds, and error rates</strong> evolve, then compute when&mdash;if ever&mdash;each algorithm crosses its threshold.</p>
+      </div>
+    </div>
+
+    <!-- ---------- COLUMN 2 ---------- -->
+    <div class="col">
+      <div class="card tinted fig f2">
+        <img src="figs/fig2_search.png" alt="Quantum vs classical search over time">
+        <div class="figcap"><b>Fig 2 &middot; Quantum vs. classical search.</b> Accounting for hardware trends and a 1-month runtime limit, Grover-type search reaches economic advantage only around <b>2034</b>, and only for problem sizes far larger than real deep-learning search.</div>
+      </div>
+
+      <div class="card">
+        <h2>Where Could Quantum Help?</h2>
+        <p>We assess the best available quantum option at each stage of the deep-learning pipeline &mdash; and its status today.</p>
+        <table>
+          <thead>
+            <tr><th>DL stage</th><th>Best quantum option</th><th>Speedup</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Data processing</td>
+              <td>q-means; quantum PCA</td>
+              <td><span class="pill exp">Exponential</span></td>
+              <td>Blocked by QRAM</td>
+            </tr>
+            <tr>
+              <td>Hyperparameter &amp; action search</td>
+              <td>Grover; D&uuml;rr&ndash;H&oslash;yer</td>
+              <td><span class="pill quad">Quadratic</span></td>
+              <td>Infeasible (N&nbsp;&gt;&nbsp;10<sup>24</sup>)</td>
+            </tr>
+            <tr>
+              <td>General matmul / attention</td>
+              <td>Swap-test; Gao attention</td>
+              <td><span class="pill poly">Polynomial</span></td>
+              <td>Lost to overhead; QRAM limits</td>
+            </tr>
+            <tr>
+              <td>NN training (classical)</td>
+              <td>Allcock; Liu; Newton; Zlokapa</td>
+              <td><span class="pill mix">Mixed</span></td>
+              <td>Promising, but slow / restrictive</td>
+            </tr>
+            <tr>
+              <td>Quantum NNs / VQAs</td>
+              <td>VQAs; kernel methods</td>
+              <td><span class="pill unc">Unclear</span></td>
+              <td>No advantage in benchmarks</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="figcap"><b>Table 1.</b> Status of quantum acceleration across the deep-learning pipeline.</div>
+      </div>
+
+      <div class="card">
+        <h2>Robustness</h2>
+        <p>We vary every growth rate and constant in the model across <strong>10<sup>&minus;3</sup>&ndash;10<sup>4</sup></strong>. The predicted advantage year is <strong>largely insensitive</strong> to these changes.</p>
+        <p>The one real lever is the <strong>quantum gate-speed improvement rate</strong> (beyond Moore's law), which materially shifts the outlook for matrix multiplication. Grover predictions are robust &mdash; these algorithms are <em>time-bound, not qubit-bound</em>.</p>
+      </div>
+    </div>
+
+    <!-- ---------- COLUMN 3 ---------- -->
+    <div class="col">
+      <div class="card tinted fig">
+        <img src="figs/fig3_panels.png" alt="Advantage analysis by algorithm type">
+        <div class="figcap"><b>Fig 3 &middot; Advantage by algorithm class.</b> Problem sizes in the shaded region are feasible on a quantum computer; only those above the orange QEA line benefit. <b>(a)</b> exponential speedups can win by ~2033; <b>(b)</b> Grover wins only at enormous sizes (~2034); <b>(c)</b> dense matrix multiplication stays out of reach.</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">3</span>Three Roadblocks</h2>
+        <div class="road">
+          <div class="rn">1</div>
+          <div class="rt"><b>Overhead swamps matmul.</b> Quantum matrix multiplication beats classical <em>O(N<sup>3</sup>)</em> asymptotically, but constant overhead makes it infeasible at any practical size for foreseeable hardware.</div>
+        </div>
+        <div class="road">
+          <div class="rn">2</div>
+          <div class="rt"><b>QRAM is missing.</b> The most powerful speedups &mdash; q-means, quantum PCA, HHL-based training, kernel methods &mdash; all depend on practical <em>QRAM</em>, which remains underdeveloped.</div>
+        </div>
+        <div class="road">
+          <div class="rn">3</div>
+          <div class="rt"><b>Special cases only.</b> Grover-type quadratic speedups need search sizes <em>&gt; 10<sup>24</sup></em> to pay off &mdash; far beyond real hyperparameter or RL action search.</div>
+        </div>
+      </div>
+
+      <div class="card accent">
+        <h2>Call to Action</h2>
+        <ul>
+          <li><strong>Accelerate QRAM</strong> &mdash; it gates most of the promising exponential speedups.</li>
+          <li><strong>Push quantum gate speed</strong> and cut error-correction overhead beyond current roadmaps.</li>
+          <li><strong>Target problems</strong> with both a clear asymptotic advantage <em>and</em> viable problem sizes.</li>
+          <li><strong>Stay skeptical</strong> of exponential &ldquo;training&rdquo; claims that rest on heavy preconditions.</li>
+        </ul>
+        <p style="margin-bottom:0;">Quantum's near-term role in deep learning is <strong>narrow</strong>. The opportunity is real &mdash; but realizing it requires a leap, not a step.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="footer">
+    <div><b>Contact:</b> hansgund@mit.edu &middot; neil_t@mit.edu &nbsp;&middot;&nbsp; MIT FutureTech, CSAIL</div>
+    <div class="cite">Gundlach, Kukina, Lynch &amp; Thompson (2026). <b>Position: Quantum Deep Learning Still Needs a Quantum Leap.</b> ICML 2026 / PMLR 306 &middot; arXiv:2511.01253</div>
+  </div>
+
+</div>
+</body>
+</html>

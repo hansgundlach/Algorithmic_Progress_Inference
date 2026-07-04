@@ -1,0 +1,450 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "rai:dataBiases",
+    "dataCollection": "rai:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "personalSensitiveInformation": "rai:personalSensitiveInformation",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "samplingRate": "cr:samplingRate"
+  },
+  "@type": "sc:Dataset",
+  "@id": "https://huggingface.co/datasets/anonymous-noname/econ_eval",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "combined_benchmark_price_data_csv",
+      "name": "combined_benchmark_price_data.csv",
+      "description": "Combined benchmark-level inference price dataset for GPQA-Diamond, AIME, and SWE-Bench Verified.",
+      "contentUrl": "https://huggingface.co/datasets/anonymous-noname/econ_eval/resolve/main/combined_benchmark_price_data.csv",
+      "encodingFormat": "text/csv",
+      "sha256": "c15379476d6e1934f21c887128561bbcbc37380388a1c20f0c99c04df6f9cd9d"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "@id": "default",
+      "description": "Rows from combined_benchmark_price_data.csv.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "default/Benchmark",
+          "dataType": "sc:Text",
+          "source": {
+            "extract": {
+              "column": "Benchmark"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Benchmark name: GPQA-Diamond, AIME, or SWE-bench Verified."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Model",
+          "dataType": "sc:Text",
+          "source": {
+            "extract": {
+              "column": "Model"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Model identifier, typically including a date suffix reflecting the price-snapshot date."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Release_Date",
+          "dataType": "sc:Text",
+          "source": {
+            "extract": {
+              "column": "Release Date"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Date of the price snapshot; this is not necessarily the original model release date."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Benchmark_Score",
+          "dataType": "sc:Text",
+          "source": {
+            "extract": {
+              "column": "Benchmark Score"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Model score or accuracy on the benchmark, as reported by the upstream benchmark source."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Benchmark_Price_USD",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Benchmark Price USD"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Estimated total USD cost to run the full benchmark once on this model at this snapshot date."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Input_Price_USD_1M_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Input Price USD/1M Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Input-token price in USD per million tokens at the snapshot date."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Output_Price_USD_1M_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Output Price USD/1M Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Output-token price in USD per million tokens at the snapshot date."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_Read_Price_USD_1M_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Cache Read Price USD/1M Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Cache-read token price in USD per million tokens where available."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_Write_Price_USD_1M_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Cache Write Price USD/1M Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Cache-write token price in USD per million tokens where available."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Input_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Input Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Number of input tokens used to run the benchmark, normalized to one benchmark run where needed."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Output_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Output Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Number of output tokens generated, normalized to one benchmark run where needed."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Reasoning_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Reasoning Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Number of reasoning or thinking tokens where applicable."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Reasoning_In_Output",
+          "dataType": "sc:Boolean",
+          "source": {
+            "extract": {
+              "column": "Reasoning In Output"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Whether reasoning tokens are counted as part of output tokens."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_Read_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Cache Read Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Number of cache-read tokens used where applicable."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_Write_Tokens",
+          "dataType": "sc:Float",
+          "source": {
+            "extract": {
+              "column": "Cache Write Tokens"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Number of cache-write tokens used where applicable."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_In_Input",
+          "dataType": "sc:Boolean",
+          "source": {
+            "extract": {
+              "column": "Cache In Input"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Whether cache-read tokens are counted as part of input tokens."
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/Cache_In_Output",
+          "dataType": "sc:Boolean",
+          "source": {
+            "extract": {
+              "column": "Cache In Output"
+            },
+            "fileObject": {
+              "@id": "combined_benchmark_price_data_csv"
+            }
+          },
+          "description": "Whether cache-write tokens are counted as part of output tokens."
+        }
+      ]
+    }
+  ],
+  "conformsTo": [
+    "http://mlcommons.org/croissant/1.1",
+    "http://mlcommons.org/croissant/RAI/1.0"
+  ],
+  "name": "econ_eval",
+  "description": "This dataset combines historical LLM inference prices with benchmark performance scores to construct a benchmark-level LLM inference-cost dataset. It covers 100+ models across GPQA-Diamond, SWE-bench Verified, and AIME over a two-year window from April 2024 to April 2026, with varying coverage by benchmark. The dataset supports cost-aware analysis of AI benchmark progress, including price-performance trends, cost-performance Pareto frontiers, and decompositions of progress into price-independent and inference-spending-associated components.",
+  "alternateName": [
+    "anonymous-noname/econ_eval",
+    "The Price of Progress: Benchmark-Level LLM Inference Cost Dataset"
+  ],
+  "creator": {
+    "@type": "Person",
+    "name": "Anonymous Authors",
+    "url": "https://huggingface.co/anonymous-noname"
+  },
+  "keywords": [
+    "ai-evaluation",
+    "benchmarks",
+    "llm",
+    "inference-cost",
+    "price-performance",
+    "gpqa",
+    "swe-bench",
+    "aime",
+    "algorithmic-progress",
+    "cost-aware evaluation",
+    "NeurIPS 2026 Evaluations and Datasets"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "url": "https://huggingface.co/datasets/anonymous-noname/econ_eval",
+  "version": "1.0.0",
+  "dateCreated": "2026-05-06",
+  "dateModified": "2026-05-07",
+  "datePublished": "2026-05-07",
+  "inLanguage": [
+    "en"
+  ],
+  "isLiveDataset": false,
+  "citeAs": "Anonymous Authors. The Price of Progress: Revisiting Benchmark Progress in AI. NeurIPS 2026 Evaluations and Datasets Track submission, 2026. Dataset: https://huggingface.co/datasets/anonymous-noname/econ_eval",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Hugging Face",
+    "url": "https://huggingface.co/"
+  },
+  "rai:dataLimitations": [
+    "Benchmark coverage is limited to GPQA-Diamond, AIME, and SWE-bench Verified; trends may differ for other tasks, modalities, languages, agentic settings, or domains.",
+    "The dataset covers April 2024 to April 2026 and relies on uneven Internet Archive availability; missing or sparse price snapshots can affect time-trend estimates.",
+    "Prices are user-facing public/API prices, not provider marginal costs. Latency, rate limits, reliability, enterprise contracts, and private discounts are not captured.",
+    "The dataset reflects only models that could be matched between upstream benchmark and price sources. Unmatched models, underspecified benchmark reports, and zero-dollar promotional price entries are excluded.",
+    "Historical cache-token prices are incomplete; current provider cache prices are used as proxies in settings where cached tokens materially affect cost, especially SWE-bench Verified.",
+    "Open-weight subsets are small, especially for SWE-bench Verified, so open-weight-specific conclusions and hardware/algorithmic/competitive decompositions should be treated as suggestive rather than causal.",
+    "The dataset should not be used as a complete leaderboard, a precise marginal-cost series, or direct evidence of real-world deployment performance without additional context."
+  ],
+  "rai:dataBiases": [
+    "Selection bias: models appear only when they are covered by upstream benchmark results and can be matched to publicly observable price data.",
+    "Benchmark bias: GPQA-Diamond, AIME, and SWE-bench Verified emphasize scientific reasoning, competition mathematics, and software engineering; they do not represent all economically or socially relevant model capabilities.",
+    "Provider-price bias: the construction uses the lowest observable available input/output price to approximate an accessible cost frontier, which may underrepresent prices faced by users who require low latency, high throughput, support, or enterprise features.",
+    "Temporal bias: Internet Archive snapshots are irregular and the observed price at a snapshot date may miss short-lived price changes or provider-specific availability changes.",
+    "Licensing/model-ecosystem bias: open-weight and proprietary models have different coverage patterns across benchmarks, and comparisons may conflate technical progress with availability, evaluation choice, and business strategy.",
+    "Upstream measurement bias: benchmark scores and token usage inherit the design choices, possible noise, and reporting conventions of the upstream benchmark datasets and evaluation providers."
+  ],
+  "rai:personalSensitiveInformation": [
+    "The released dataset is not intended to contain personal data or sensitive personal information. It contains model names, benchmark names, scores, token counts, and price fields.",
+    "The dataset does not include individual user conversations, human-subject records, demographic attributes, medical information, political/religious information, or raw benchmark item content.",
+    "Any model/provider names or benchmark names are public-facing technical metadata rather than personal identifiers."
+  ],
+  "rai:dataUseCases": [
+    "Measuring benchmark-level LLM price-performance improvement rates over time conditional on accuracy.",
+    "Constructing cost-performance Pareto frontiers for GPQA-Diamond, AIME, and SWE-bench Verified.",
+    "Studying whether benchmark progress is associated with falling costs at fixed performance or rising inference expenditure at the frontier.",
+    "Estimating suggestive components of observed price changes, such as hardware progress, algorithmic/technical inference efficiency, and competitive/provider-price effects.",
+    "Supporting reproducibility of the accompanying NeurIPS 2026 Evaluations and Datasets submission.",
+    "Not recommended for estimating provider marginal costs, evaluating user-specific deployment economics, ranking all models across all capabilities, or making claims outside the included benchmarks and date range without further validation."
+  ],
+  "rai:dataSocialImpact": "Positive impacts include improved transparency around the cost of AI evaluation, clearer interpretation of benchmark progress per dollar, and better evidence for researchers, evaluators, and policymakers studying the diffusion of AI capabilities. Potential negative impacts include overemphasis on the included benchmarks, mistaken interpretation of user-facing API prices as marginal costs, or strategic misuse of price-performance trends without accounting for limitations, licensing, and upstream measurement uncertainty. Mitigations include explicit limitations, source attribution, open documentation, and warnings against use as a complete deployment-cost or capability-ranking dataset.",
+  "rai:hasSyntheticData": false,
+  "rai:dataCollection": "Historical input and output token prices were collected from Internet Archive snapshots of Artificial Analysis pages over April 2024 to April 2026. Benchmark scores and token usage were obtained from Epoch AI's LLM Benchmarking Hub. Model names were manually matched across sources, unmatched or underspecified entries were excluded, and benchmark-level prices were computed by multiplying token counts by the relevant historical token prices. Cache-token prices were added from provider pricing where needed.",
+  "rai:dataCollectionType": [
+    "Secondary Data Analysis",
+    "Web Archival Collection",
+    "Manual Human Curation",
+    "Software Collection"
+  ],
+  "rai:dataCollectionTimeFrameStart": {
+    "@value": "2024-04-01",
+    "@type": "sc:Date"
+  },
+  "rai:dataCollectionTimeFrameEnd": {
+    "@value": "2026-04-30",
+    "@type": "sc:Date"
+  },
+  "rai:dataPreprocessingProtocol": [
+    "Remove model-price entries with zero-dollar input or output token costs because they are interpreted as promotional offers rather than representative inference prices.",
+    "Retain the lowest observable input and output token prices at each snapshot date to approximate the accessible inference-price frontier.",
+    "Manually match model names between Artificial Analysis price entries and Epoch AI benchmark records; exclude entries that cannot be matched with sufficient confidence.",
+    "Compute Benchmark Price USD as input-token cost plus output-token cost plus cache-read/write costs where applicable.",
+    "Normalize benchmark token counts to a single benchmark run when upstream evaluations contain multiple runs.",
+    "Treat multiple reasoning-budget variants of a model as distinct model entries and treat price changes over time for the same model as separate data points."
+  ],
+  "rai:dataAnnotationProtocol": [
+    "No new human-subject labels were collected for this dataset. Benchmark scores, token counts, and prices were extracted or derived from upstream public sources. Human work consisted of source collection, model-name matching, cleaning, and derived-price computation."
+  ],
+  "rai:dataReleaseMaintenancePlan": "The dataset is released as a static anonymized submission artifact on Hugging Face for review. If the submission is accepted and the dataset is de-anonymized or updated, maintainers should update the README, Croissant metadata, citation, version/dateModified fields, and any changed preprocessing or licensing notes.",
+  "prov:wasDerivedFrom": [
+    "https://artificialanalysis.ai",
+    "https://epoch.ai/data/llm-benchmarking-hub",
+    "https://web.archive.org"
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@id": "#activity-price-collection",
+      "@type": "prov:Activity",
+      "name": "Historical price collection",
+      "description": "Collected Internet Archive snapshots of Artificial Analysis pages to reconstruct historical input and output token prices from April 2024 to April 2026."
+    },
+    {
+      "@id": "#activity-benchmark-extraction",
+      "@type": "prov:Activity",
+      "name": "Benchmark score and token extraction",
+      "description": "Downloaded model-level benchmark scores and input, output, reasoning, and cached-token counts from Epoch AI's LLM Benchmarking Hub."
+    },
+    {
+      "@id": "#activity-model-matching",
+      "@type": "prov:Activity",
+      "name": "Model matching and filtering",
+      "description": "Manually matched model names between price and benchmark sources; removed unmatched, underspecified, and zero-cost promotional entries."
+    },
+    {
+      "@id": "#activity-price-computation",
+      "@type": "prov:Activity",
+      "name": "Benchmark-price computation",
+      "description": "Computed benchmark-level inference prices from token counts and token prices, including cache costs where relevant and normalizing to one benchmark run."
+    }
+  ]
+}

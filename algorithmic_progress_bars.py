@@ -12,7 +12,7 @@ import pandas as pd
 RESULTS_PATH = "results_data/regression_comparison_table_raw.csv"
 OUTPUT_PDF = "figures/algorithmic_progress_bars_neurips.pdf"
 OUTPUT_PNG = "figures/algorithmic_progress_bars_neurips.png"
-HARDWARE_FACTOR = 1.7
+HARDWARE_FACTOR = 1 / 0.7  # hardware costs drop 30%/yr → gain factor = 1/0.7 ≈ 1.4286
 
 BENCHMARK_MAP = {
     "GPQA": "GPQA-D",
